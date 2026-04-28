@@ -138,20 +138,19 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 
 /* CARD HEADER — editable fields */
 .card-hd{
-  padding:16px 20px 0;
+  padding:10px 20px 0;
   display:flex;flex-direction:column;gap:0
 }
-.card-hd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:12px}
+.card-hd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:8px}
 .card-hd-fields{flex:1;display:flex;flex-direction:column;gap:8px}
 
 .field-address{
   font-family:'Playfair Display',serif;font-size:22px;font-weight:700;
   background:transparent;border:none;border-bottom:1px dashed transparent;
   color:var(--txt);width:100%;outline:none;cursor:pointer;
-  transition:border-color .15s;padding:10px 0 8px;letter-spacing:.01em;line-height:1.4;
-  font-style:italic
+  transition:border-color .15s;padding:4px 0 3px;letter-spacing:.01em;line-height:1.3;
 }
-.field-address:hover,.field-address:focus{border-bottom-color:var(--bdr2);cursor:text;background:rgba(0,0,0,.03);border-radius:4px 4px 0 0;padding:10px 8px 8px}
+.field-address:hover,.field-address:focus{border-bottom-color:var(--bdr2);cursor:text;background:rgba(0,0,0,.03);border-radius:4px 4px 0 0;padding:4px 8px 3px}
 
 .hd-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .field-inline{
@@ -373,16 +372,16 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 
 /* TOGGLE BAR */
 .toggle-bar{
-  display:flex;align-items:center;justify-content:space-between;
-  width:100%;padding:10px 20px;
+  display:flex;align-items:center;justify-content:center;
+  width:100%;padding:9px 20px;
   background:var(--surf2);border:none;border-top:1px solid var(--bdr);
-  cursor:pointer;transition:background .15s;gap:12px;
+  cursor:pointer;transition:background .15s;gap:10px;
   font-family:var(--fb);
 }
 .toggle-bar:hover{background:var(--surf3)}
 .prop-card.open .toggle-bar{background:var(--surf3);border-bottom:1px solid var(--bdr)}
-.toggle-bar-left{display:flex;align-items:center;gap:8px;flex:1}
-.toggle-bar-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.toggle-bar-left{display:flex;align-items:center;gap:8px}
+.toggle-bar-right{display:flex;align-items:center;gap:6px}
 .toggle-label{font-size:12px;font-weight:600;color:var(--txt2);letter-spacing:.02em}
 .toggle-bar:hover .toggle-label{color:var(--acc)}
 .toggle-chevron{color:var(--txt3);transition:transform .22s;flex-shrink:0}
@@ -877,7 +876,7 @@ function buildCard(p) {
     <div class="card-meta">
       ${chips}
       <span class="prog-label" style="color:${prColor}">${pr}% complete</span>
-      ${p.foia_url ? `<span class="foia-badge"><span class="foia-badge-dot"></span>FOIA Filed</span>` : ''}
+      ${p.foia_url ? `<span class="foia-badge"><span class="foia-badge-dot"></span>FOIA Uploaded</span>` : ''}
       ${emailPills ? `<span style="color:var(--txt3);margin:0 2px">|</span>${emailPills}` : ''}
     </div>
     <button class="toggle-bar" onclick="toggleCard(this)">
