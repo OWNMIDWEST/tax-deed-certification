@@ -247,18 +247,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 }
 
 /* ADD PROPERTY between cards */
-.add-between{
-  display:flex;align-items:center;gap:10px;padding:4px 0;opacity:.5;
-  transition:opacity .18s;cursor:pointer
-}
-.add-between:hover{opacity:1}
-.add-line{flex:1;height:1px;background:var(--bdr2)}
-.add-between-btn{
-  font-size:11px;color:var(--acc);border:1px dashed rgba(182,232,74,.4);
-  background:transparent;border-radius:20px;padding:4px 14px;
-  font-family:var(--fb);cursor:pointer;transition:all .14s;white-space:nowrap
-}
-.add-between-btn:hover{background:var(--acc-dim)}
+
 
 /* MODAL */
 .overlay{
@@ -409,6 +398,39 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 .mini-step.mini-done[data-cat=title]{background:var(--pur);border-color:var(--pur)}
 .mini-step.mini-done[data-cat=closing]{background:var(--acc);border-color:var(--acc)}
 .mini-step.mini-done[data-cat=done]{background:var(--teal);border-color:var(--teal)}
+
+/* FOIA HEADER BADGE */
+.foia-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:700;letter-spacing:.06em;
+  color:#c93b2a;background:rgba(201,59,42,0.1);
+  border:1px solid rgba(201,59,42,0.3);border-radius:20px;
+  padding:2px 8px;white-space:nowrap;font-family:var(--fm)
+}
+.foia-badge-dot{width:5px;height:5px;border-radius:50%;background:#c93b2a;flex-shrink:0}
+
+/* DOCS SECTION layout */
+.docs-cols{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.docs-col{display:flex;flex-direction:column;gap:8px;min-width:200px;flex:1}
+.docs-col-lbl{
+  font-size:9px;font-weight:700;letter-spacing:.12em;
+  color:var(--txt3);text-transform:uppercase;margin-bottom:2px
+}
+.extra-doc-item{
+  display:flex;align-items:center;gap:6px;
+  background:var(--surf2);border:1px solid var(--bdr);
+  border-radius:8px;padding:6px 10px
+}
+.extra-doc-item a{
+  color:var(--txt2);font-size:12px;font-family:var(--fm);
+  text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.extra-doc-item a:hover{color:var(--acc)}
+.extra-doc-del{
+  background:none;border:none;color:var(--txt3);cursor:pointer;
+  font-size:14px;line-height:1;padding:0 2px;flex-shrink:0;transition:color .14s
+}
+.extra-doc-del:hover{color:var(--dng)}
 </style>
 </head>
 <body>
@@ -780,7 +802,7 @@ function render() {
   updateStateFilter();
   const items = getFiltered();
   const wrap = document.getElementById('props-wrap');
-  wrap.querySelectorAll('.prop-card,.add-between').forEach(el=>el.remove());
+  wrap.querySelectorAll('.prop-card').forEach(el=>el.remove());
   const empty = document.getElementById('empty-st');
   if (!items.length) {
     empty.style.display = 'block';
@@ -790,7 +812,6 @@ function render() {
   empty.style.display = 'none';
   items.forEach((p, i) => {
     wrap.appendChild(buildCard(p));
-    wrap.appendChild(buildAddBetween());
   });
 }
 
@@ -856,6 +877,7 @@ function buildCard(p) {
     <div class="card-meta">
       ${chips}
       <span class="prog-label" style="color:${prColor}">${pr}% complete</span>
+      ${p.foia_url ? `<span class="foia-badge"><span class="foia-badge-dot"></span>FOIA Filed</span>` : ''}
       ${emailPills ? `<span style="color:var(--txt3);margin:0 2px">|</span>${emailPills}` : ''}
     </div>
     <button class="toggle-bar" onclick="toggleCard(this)">
@@ -879,21 +901,23 @@ function buildCard(p) {
       <div class="notes-display${p.notes?'':' empty'}" onclick="editNotes('${p.id}',this)">${p.notes?esc(p.notes):'Click to add notes…'}</div>
     </div>
     <div class="foia-row">
-      <div class="foia-lbl">FOIA Document</div>
-      <div class="foia-area" id="foia-area-${p.id}">
-        ${buildFoiaHtml(p)}
+      <div class="foia-lbl">Documents</div>
+      <div class="docs-cols">
+        <div class="docs-col">
+          <div class="docs-col-lbl">FOIA Document</div>
+          <div id="foia-area-${p.id}">${buildFoiaHtml(p)}</div>
+        </div>
+        <div class="docs-col">
+          <div class="docs-col-lbl">Additional Files</div>
+          <div id="extra-area-${p.id}">${buildExtraDocsHtml(p)}</div>
+        </div>
       </div>
     </div>
   `;
   return card;
 }
 
-function buildAddBetween() {
-  const div = document.createElement('div');
-  div.className = 'add-between';
-  div.innerHTML = `<div class="add-line"></div><button class="add-between-btn" onclick="openAdd()">+ Add Property</button><div class="add-line"></div>`;
-  return div;
-}
+
 
 // ── INTERACTIONS ─────────────────────────────────────────
 function toggleCard(el) { el.closest('.prop-card').classList.toggle('open'); }
@@ -1117,16 +1141,30 @@ function buildFoiaHtml(p) {
   if (p.foia_url) {
     const name = p.foia_name || 'FOIA Document';
     return `
-      <a class="foia-link" href="${esc(p.foia_url)}" target="_blank" rel="noopener">📄 ${esc(name)}</a>
-      <button class="foia-del" onclick="deleteFoia('${p.id}')">Remove</button>
-    `;
+      <div class="extra-doc-item">
+        <a href="${esc(p.foia_url)}" target="_blank" rel="noopener" title="${esc(name)}">📄 ${esc(name)}</a>
+        <button class="extra-doc-del" onclick="deleteFoia('${p.id}')" title="Remove">×</button>
+      </div>`;
   }
   return `
     <label class="foia-file-btn">
       📎 Attach FOIA PDF
-      <input type="file" accept="application/pdf,application/msword,.pdf,.doc,.docx" onchange="uploadFoia('${p.id}', this)" />
-    </label>
-  `;
+      <input type="file" accept="application/pdf,.pdf,.doc,.docx" onchange="uploadFoia('${p.id}', this)" />
+    </label>`;
+}
+
+function buildExtraDocsHtml(p) {
+  const docs = p.extra_docs || [];
+  const items = docs.map((d, i) => `
+    <div class="extra-doc-item">
+      <a href="${esc(d.url)}" target="_blank" rel="noopener" title="${esc(d.name)}">📎 ${esc(d.name)}</a>
+      <button class="extra-doc-del" onclick="deleteExtraDoc('${p.id}',${i})" title="Remove">×</button>
+    </div>`).join('');
+  return items + `
+    <label class="foia-file-btn" style="margin-top:${docs.length?'6px':'0'}">
+      + Add File
+      <input type="file" accept="application/pdf,.pdf,.doc,.docx,.png,.jpg,.jpeg" onchange="uploadExtraDoc('${p.id}', this)" />
+    </label>`;
 }
 
 async function uploadFoia(propId, input) {
@@ -1193,6 +1231,63 @@ async function deleteFoia(propId) {
   const area = document.getElementById('foia-area-' + propId);
   if (area) area.innerHTML = buildFoiaHtml(p);
   toast('FOIA document removed', 'ok');
+}
+
+
+async function uploadExtraDoc(propId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const area = document.getElementById('extra-area-' + propId);
+  const prevHtml = area ? area.innerHTML : '';
+  if (area) area.innerHTML = '<span class="foia-uploading">⏳ Uploading…</span>';
+
+  const uploadFile = async () => {
+    const fileName = propId + '_extra_' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    const res = await fetch(`${SB_URL}/storage/v1/object/foia-docs/${fileName}`, {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type||'application/octet-stream'},
+      body: file
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return `${SB_URL}/storage/v1/object/public/foia-docs/${fileName}`;
+  };
+
+  try {
+    const url = await uploadFile();
+    const p = DB.find(x=>x.id===propId);
+    if (p) {
+      if (!p.extra_docs) p.extra_docs = [];
+      p.extra_docs.push({url, name: file.name});
+      schedSave(propId);
+      if (area) area.innerHTML = buildExtraDocsHtml(p);
+      toast('File uploaded', 'ok');
+    }
+  } catch(e) {
+    // Fallback: base64
+    const reader = new FileReader();
+    reader.onload = () => {
+      const p = DB.find(x=>x.id===propId);
+      if (p) {
+        if (!p.extra_docs) p.extra_docs = [];
+        p.extra_docs.push({url: reader.result, name: file.name});
+        schedSave(propId);
+        if (area) area.innerHTML = buildExtraDocsHtml(p);
+        toast('File attached (local)', 'ok');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function deleteExtraDoc(propId, idx) {
+  if (!confirm('Remove this file?')) return;
+  const p = DB.find(x=>x.id===propId);
+  if (!p || !p.extra_docs) return;
+  p.extra_docs.splice(idx, 1);
+  schedSave(propId);
+  const area = document.getElementById('extra-area-' + propId);
+  if (area) area.innerHTML = buildExtraDocsHtml(p);
+  toast('File removed', 'ok');
 }
 
 </script>
