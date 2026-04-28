@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tax Deed Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0d0c;--surf:#131614;--surf2:#191c1a;--surf3:#1f2320;
+  --bdr:rgba(255,255,255,0.07);--bdr2:rgba(255,255,255,0.13);
+  --txt:#e2e9e2;--txt2:#7a8b7a;--txt3:#48554a;
+  --acc:#b6e84a;--acc-dim:rgba(182,232,74,0.1);--acc-dk:#0b1900;
+  --info:#58c1e5;--info-dim:rgba(88,193,229,0.1);
+  --pur:#ae82f8;--pur-dim:rgba(174,130,248,0.1);
+  --teal:#32d190;--teal-dim:rgba(50,209,144,0.1);
+  --warn:#f4c63e;--warn-dim:rgba(244,198,62,0.1);
+  --dng:#ff6a58;--dng-dim:rgba(255,106,88,0.1);
+  --r:10px;--rl:14px;
+  --fh:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'IBM Plex Mono',monospace
+}
+body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100vh;font-size:14px}
+
+/* ── LAYOUT ── */
+.shell{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:220px;min-width:220px;background:var(--surf);
+  border-right:1px solid var(--bdr);display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;z-index:30
+}
+.logo{padding:20px 18px 16px;border-bottom:1px solid var(--bdr)}
+.logo-mark{font-family:var(--fh);font-size:13px;font-weight:800;color:var(--acc);letter-spacing:.1em;text-transform:uppercase}
+.logo-sub{font-size:10px;color:var(--txt3);font-family:var(--fm);margin-top:2px}
+
+.sb-nav{padding:12px 8px;flex:1}
+.sb-lbl{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--txt3);text-transform:uppercase;padding:0 8px;margin:10px 0 4px;display:block}
+.sb-btn{
+  display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  padding:8px 10px;border-radius:8px;border:none;background:none;
+  color:var(--txt2);font-size:12px;font-family:var(--fb);cursor:pointer;
+  transition:all .14s;margin-bottom:1px
+}
+.sb-btn:hover{background:var(--surf2);color:var(--txt)}
+.sb-btn.active{background:var(--acc-dim);color:var(--acc)}
+.sb-btn .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.page-btn{
+  display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  padding:9px 10px;border-radius:8px;border:none;background:none;
+  color:var(--txt2);font-size:12px;font-family:var(--fh);font-weight:600;
+  cursor:pointer;transition:all .14s;margin-bottom:2px;letter-spacing:.02em
+}
+.page-btn:hover{background:var(--surf2);color:var(--txt)}
+.page-btn.active{background:var(--surf3);color:var(--acc);border:1px solid var(--bdr2)}
+.page-icon{font-size:14px;width:16px;text-align:center}
+
+.sb-stats{padding:12px 16px;border-top:1px solid var(--bdr)}
+.sb-stat{display:flex;justify-content:space-between;font-size:11px;color:var(--txt3);padding:2px 0}
+.sb-stat span{color:var(--acc);font-family:var(--fm)}
+.sb-foot{padding:10px 16px;border-top:1px solid var(--bdr);font-size:10px;color:var(--txt3);font-family:var(--fm)}
+
+/* ── SYNC STATUS ── */
+.sync-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;font-family:var(--fm);padding:3px 8px;
+  border-radius:20px;border:1px solid var(--bdr2);margin:8px 16px;
+}
+.sync-badge.ok{color:var(--teal);border-color:rgba(50,209,144,.25)}
+.sync-badge.saving{color:var(--warn);border-color:rgba(244,198,62,.25)}
+.sync-badge.err{color:var(--dng);border-color:rgba(255,106,88,.25)}
+.sync-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 26px;border-bottom:1px solid var(--bdr);
+  background:var(--surf);position:sticky;top:0;z-index:20
+}
+.topbar-l{display:flex;flex-direction:column;gap:2px}
+.topbar-title{font-family:var(--fh);font-size:17px;font-weight:700}
+.topbar-sub{font-size:11px;color:var(--txt3)}
+.topbar-r{display:flex;gap:10px;align-items:center}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .14s;border:none;font-family:var(--fb)
+}
+.btn-primary{background:var(--acc);color:var(--acc-dk);font-weight:600}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-ghost{background:var(--surf2);color:var(--txt2);border:1px solid var(--bdr2)}
+.btn-ghost:hover{color:var(--txt);background:var(--surf3)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-danger{background:transparent;color:var(--dng);border:1px solid rgba(255,106,88,.25)}
+.btn-danger:hover{background:var(--dng-dim)}
+.btn-icon{padding:6px 10px}
+
+/* STATS */
+.stats-bar{display:flex;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.st{flex:1;padding:12px 18px;border-right:1px solid var(--bdr);display:flex;flex-direction:column;gap:2px}
+.st:last-child{border-right:none}
+.st-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);font-weight:600}
+.st-val{font-family:var(--fh);font-size:20px;font-weight:700}
+.st-val.g{color:var(--acc)}.st-val.b{color:var(--info)}.st-val.a{color:var(--warn)}.st-val.t{color:var(--teal)}
+
+/* TOOLBAR */
+.toolbar{
+  display:flex;gap:10px;padding:12px 26px;border-bottom:1px solid var(--bdr);
+  background:var(--surf);align-items:center;flex-wrap:wrap
+}
+.sw{position:relative;flex:1;min-width:180px}
+.sw input{
+  width:100%;background:var(--surf2);border:1px solid var(--bdr);
+  border-radius:8px;padding:7px 10px 7px 30px;color:var(--txt);
+  font-size:13px;font-family:var(--fb);outline:none
+}
+.sw input:focus{border-color:var(--bdr2)}
+.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:12px;pointer-events:none}
+.fsel{
+  background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;
+  padding:7px 10px;color:var(--txt2);font-size:12px;font-family:var(--fb);outline:none;cursor:pointer
+}
+
+/* PROPS WRAP */
+.props-wrap{flex:1;overflow-y:auto;padding:20px 26px;display:flex;flex-direction:column;gap:16px}
+
+/* PROPERTY CARD */
+.prop-card{
+  background:var(--surf);border:1px solid var(--bdr);
+  border-radius:var(--rl);overflow:hidden;transition:border-color .18s
+}
+.prop-card:hover{border-color:var(--bdr2)}
+
+/* CARD HEADER — editable fields */
+.card-hd{
+  padding:16px 20px 0;cursor:pointer;
+  display:flex;flex-direction:column;gap:0
+}
+.card-hd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:12px}
+.card-hd-fields{flex:1;display:flex;flex-direction:column;gap:8px}
+
+.field-address{
+  font-family:var(--fh);font-size:16px;font-weight:800;
+  background:transparent;border:none;border-bottom:1px dashed transparent;
+  color:var(--txt);width:100%;outline:none;cursor:pointer;
+  transition:border-color .15s;padding:2px 0;letter-spacing:-.01em
+}
+.field-address:hover,.field-address:focus{border-bottom-color:var(--bdr2);cursor:text;background:rgba(255,255,255,.02);border-radius:4px 4px 0 0;padding:2px 6px}
+
+.hd-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.field-inline{
+  background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;
+  padding:5px 10px;font-size:13px;font-family:var(--fb);color:var(--txt2);
+  outline:none;transition:all .14s;min-width:140px
+}
+.field-inline:focus{border-color:rgba(182,232,74,.4);color:var(--txt)}
+.field-inline::placeholder{color:var(--txt3)}
+.field-label{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--txt3);text-transform:uppercase;white-space:nowrap;align-self:center}
+
+.card-meta{display:flex;flex-wrap:wrap;gap:7px;margin:0 20px;padding:10px 0;border-top:1px solid var(--bdr)}
+.chip{
+  font-size:11px;font-family:var(--fm);color:var(--txt2);
+  background:var(--surf2);border:1px solid var(--bdr);
+  padding:2px 8px;border-radius:4px
+}
+.prog-label{font-size:11px;font-family:var(--fm)}
+
+.card-hd-actions{display:flex;gap:8px;align-items:flex-start;flex-shrink:0}
+.chevron{color:var(--txt3);font-size:11px;transition:transform .2s;margin-top:4px}
+.prop-card.open .chevron{transform:rotate(180deg)}
+
+/* PROGRESS */
+.prog-bar{height:3px;background:var(--surf3);margin:0 20px;border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--acc);border-radius:2px;transition:width .4s ease}
+
+/* STEPS */
+.steps-grid{
+  display:none;
+  grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:8px;padding:12px 20px 16px;border-top:1px solid var(--bdr)
+}
+.prop-card.open .steps-grid{display:grid}
+
+.cat-div{
+  grid-column:1/-1;display:flex;align-items:center;gap:10px;
+  font-size:9px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--txt3);padding:4px 0 0
+}
+.cat-div::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+.step{
+  display:flex;align-items:flex-start;gap:8px;padding:10px 11px;
+  border-radius:var(--r);border:1px solid var(--bdr);cursor:pointer;
+  transition:all .16s;user-select:none;background:var(--surf2);position:relative
+}
+.step:hover{border-color:var(--bdr2);background:var(--surf3)}
+.step:active{transform:scale(.98)}
+.step-num{
+  width:19px;height:19px;border-radius:50%;background:var(--surf3);
+  border:1px solid var(--bdr2);display:flex;align-items:center;
+  justify-content:center;font-size:9px;font-family:var(--fm);
+  color:var(--txt3);flex-shrink:0;transition:all .16s
+}
+.step-lbl{font-size:12px;font-weight:500;color:var(--txt2);line-height:1.35;transition:color .16s}
+.step-chk{position:absolute;right:9px;top:9px;font-size:11px;opacity:0;transition:opacity .16s}
+
+.step.done[data-cat=cert]{background:var(--info-dim);border-color:rgba(88,193,229,.28)}
+.step.done[data-cat=cert] .step-lbl{color:var(--info)}
+.step.done[data-cat=cert] .step-num{background:var(--info);color:#001824;border-color:transparent}
+.step.done[data-cat=cert] .step-chk{opacity:1;color:var(--info)}
+
+.step.done[data-cat=title]{background:var(--pur-dim);border-color:rgba(174,130,248,.28)}
+.step.done[data-cat=title] .step-lbl{color:var(--pur)}
+.step.done[data-cat=title] .step-num{background:var(--pur);color:#0e0020;border-color:transparent}
+.step.done[data-cat=title] .step-chk{opacity:1;color:var(--pur)}
+
+.step.done[data-cat=closing]{background:var(--acc-dim);border-color:rgba(182,232,74,.28)}
+.step.done[data-cat=closing] .step-lbl{color:var(--acc)}
+.step.done[data-cat=closing] .step-num{background:var(--acc);color:var(--acc-dk);border-color:transparent}
+.step.done[data-cat=closing] .step-chk{opacity:1;color:var(--acc)}
+
+.step.done[data-cat=done]{background:var(--teal-dim);border-color:rgba(50,209,144,.28)}
+.step.done[data-cat=done] .step-lbl{color:var(--teal)}
+.step.done[data-cat=done] .step-num{background:var(--teal);color:#001a0e;border-color:transparent}
+.step.done[data-cat=done] .step-chk{opacity:1;color:var(--teal)}
+
+/* NOTES */
+.notes-row{display:none;padding:0 20px 16px}
+.prop-card.open .notes-row{display:block}
+.notes-lbl{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--txt3);text-transform:uppercase;margin-bottom:5px}
+.notes-display{
+  background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;
+  padding:9px 12px;font-size:13px;color:var(--txt2);line-height:1.6;
+  cursor:text;white-space:pre-wrap;min-height:36px
+}
+.notes-display.empty{color:var(--txt3);font-style:italic}
+.notes-input{
+  width:100%;background:var(--surf2);border:1px solid rgba(182,232,74,.4);
+  border-radius:8px;padding:9px 12px;font-size:13px;color:var(--txt);
+  line-height:1.6;font-family:var(--fb);resize:vertical;outline:none;min-height:70px
+}
+
+/* ADD PROPERTY between cards */
+.add-between{
+  display:flex;align-items:center;gap:10px;padding:4px 0;opacity:.5;
+  transition:opacity .18s;cursor:pointer
+}
+.add-between:hover{opacity:1}
+.add-line{flex:1;height:1px;background:var(--bdr2)}
+.add-between-btn{
+  font-size:11px;color:var(--acc);border:1px dashed rgba(182,232,74,.4);
+  background:transparent;border-radius:20px;padding:4px 14px;
+  font-family:var(--fb);cursor:pointer;transition:all .14s;white-space:nowrap
+}
+.add-between-btn:hover{background:var(--acc-dim)}
+
+/* MODAL */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .18s
+}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--surf);border:1px solid var(--bdr2);border-radius:var(--rl);
+  width:100%;max-width:640px;max-height:90vh;overflow-y:auto;
+  transform:translateY(16px);transition:transform .18s
+}
+.overlay.open .modal{transform:translateY(0)}
+.modal-hd{
+  padding:18px 22px 14px;border-bottom:1px solid var(--bdr);
+  display:flex;justify-content:space-between;align-items:center
+}
+.modal-ttl{font-family:var(--fh);font-size:16px;font-weight:700}
+.modal-x{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:20px;line-height:1}
+.modal-x:hover{color:var(--txt)}
+.modal-body{padding:18px 22px}
+.modal-ft{padding:12px 22px;border-top:1px solid var(--bdr);display:flex;gap:10px;justify-content:flex-end}
+
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.full{grid-column:1/-1}
+.flbl{font-size:11px;font-weight:600;color:var(--txt2)}
+.fi,.fta{
+  background:var(--surf2);border:1px solid var(--bdr2);border-radius:8px;
+  padding:8px 11px;color:var(--txt);font-size:13px;font-family:var(--fb);
+  outline:none;transition:border-color .14s;width:100%
+}
+.fi:focus,.fta:focus{border-color:rgba(182,232,74,.5)}
+.fta{min-height:70px;resize:vertical}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:18px;right:18px;z-index:200;display:flex;flex-direction:column;gap:7px}
+.toast{
+  background:var(--surf3);border:1px solid var(--bdr2);border-radius:10px;
+  padding:10px 15px;font-size:13px;display:flex;align-items:center;gap:7px;
+  animation:tin .2s ease-out;box-shadow:0 8px 28px rgba(0,0,0,.45)
+}
+.toast.ok{border-left:3px solid var(--acc)}
+.toast.err{border-left:3px solid var(--dng)}
+.toast.info{border-left:3px solid var(--info)}
+@keyframes tin{from{transform:translateX(24px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+.empty-st{text-align:center;padding:60px 20px;color:var(--txt3)}
+.empty-st .ei{font-size:34px;margin-bottom:10px}
+
+/* PAGE 2 PLACEHOLDER */
+.page2-wrap{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:40px}
+.page2-title{font-family:var(--fh);font-size:28px;font-weight:800;color:var(--txt)}
+.page2-sub{color:var(--txt3);font-size:14px;text-align:center;max-width:400px;line-height:1.7}
+.page2-badge{
+  background:var(--warn-dim);border:1px solid rgba(244,198,62,.3);
+  color:var(--warn);padding:8px 20px;border-radius:20px;font-size:13px;font-family:var(--fm)
+}
+
+@media(max-width:700px){
+  .sidebar{display:none}
+  .topbar,.toolbar{padding:12px 14px}
+  .props-wrap{padding:14px}
+  .stats-bar{flex-wrap:wrap}
+  .st{min-width:50%;border-bottom:1px solid var(--bdr)}
+  .fgrid{grid-template-columns:1fr}
+  .hd-row{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">TaxDeed</div>
+    <div class="logo-sub">Certification Tracker</div>
+  </div>
+
+  <nav class="sb-nav">
+    <span class="sb-lbl">Pages</span>
+    <button class="page-btn active" id="nav-p1" onclick="showPage(1)">
+      <span class="page-icon">📋</span> Tax Deed
+    </button>
+    <button class="page-btn" id="nav-p2" onclick="showPage(2)">
+      <span class="page-icon">⚖️</span> Quiet Title
+    </button>
+
+    <span class="sb-lbl" style="margin-top:14px">Filter by Company</span>
+    <button class="sb-btn active" id="co-all" onclick="setCompany('',this)">
+      <span class="dot" style="background:var(--txt3)"></span> All Companies
+    </button>
+    <div id="company-list"></div>
+
+    <span class="sb-lbl" style="margin-top:14px">Progress</span>
+    <button class="sb-btn" onclick="setProgFilter('',this)"><span class="dot" style="background:var(--txt3)"></span> All</button>
+    <button class="sb-btn" onclick="setProgFilter('partial',this)"><span class="dot" style="background:var(--acc)"></span> In Progress</button>
+    <button class="sb-btn" onclick="setProgFilter('100',this)"><span class="dot" style="background:var(--teal)"></span> Fully Closed</button>
+
+    <span class="sb-lbl" style="margin-top:14px">Step Colors</span>
+    <div style="padding:0 6px;display:flex;flex-direction:column;gap:4px">
+      <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--info);flex-shrink:0"></div>Certification</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--pur);flex-shrink:0"></div>Title Work</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--acc);flex-shrink:0"></div>Closing</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0"></div>Complete</div>
+    </div>
+  </nav>
+
+  <div id="sync-badge" class="sync-badge ok"><div class="sync-dot"></div><span id="sync-txt">Synced</span></div>
+
+  <div class="sb-stats">
+    <div class="sb-stat">Properties <span id="sb-count">0</span></div>
+    <div class="sb-stat">Invested <span id="sb-inv">$0</span></div>
+    <div class="sb-stat">Closed <span id="sb-closed">0</span></div>
+  </div>
+  <div class="sb-foot">v3.0 · Supabase Sync</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- PAGE 1: TAX DEED -->
+  <div id="page1">
+    <div class="topbar">
+      <div class="topbar-l">
+        <div class="topbar-title" id="page-title">Tax Deed Certifications</div>
+        <div class="topbar-sub">All edits auto-save and sync to teammates in real time</div>
+      </div>
+      <div class="topbar-r">
+        <button class="btn btn-ghost btn-sm" onclick="toggleExpandAll()" id="exp-btn">Expand All</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportJSON()">⬇ Export JSON</button>
+        <button class="btn btn-primary" onclick="openAdd()">+ Add Property</button>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="st"><div class="st-lbl">Properties</div><div class="st-val g" id="st-total">0</div></div>
+      <div class="st"><div class="st-lbl">Total Invested</div><div class="st-val b" id="st-inv">$0</div></div>
+      <div class="st"><div class="st-lbl">Avg Interest</div><div class="st-val a" id="st-rate">—</div></div>
+      <div class="st"><div class="st-lbl">Avg Progress</div><div class="st-val t" id="st-prog">0%</div></div>
+      <div class="st"><div class="st-lbl">Fully Closed</div><div class="st-val g" id="st-closed">0</div></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="sw">
+        <span class="si">⌕</span>
+        <input type="text" id="search" placeholder="Search address, company, cert #…" oninput="render()"/>
+      </div>
+      <select class="fsel" id="fstate" onchange="render()"><option value="">All States</option></select>
+    </div>
+
+    <div class="props-wrap" id="props-wrap">
+      <div class="empty-st" id="empty-st">
+        <div class="ei">🔄</div>
+        <p>Loading properties…</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 2: QUIET TITLE -->
+  <div id="page2" style="display:none;flex:1;flex-direction:column">
+    <div class="topbar">
+      <div class="topbar-l">
+        <div class="topbar-title">Quiet Title Process</div>
+        <div class="topbar-sub">Coming soon — structure is ready in Supabase</div>
+      </div>
+    </div>
+    <div class="page2-wrap">
+      <div class="page2-badge">⚖️ Under Construction</div>
+      <div class="page2-title">Quiet Title</div>
+      <div class="page2-sub">
+        This page will track the Quiet Title process for each property.
+        The database table is already created and ready in Supabase.
+        Provide your process steps and fields and this page will be built out.
+      </div>
+      <button class="btn btn-ghost" onclick="showPage(1)">← Back to Tax Deed</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="overlay" id="form-ov" onclick="ovClick(event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-ttl" id="form-ttl">Add Property</div>
+      <button class="modal-x" onclick="closeForm()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="fgrid">
+        <div class="fg full"><label class="flbl">Property Address *</label><input class="fi" id="fa" placeholder="123 Main St, Miami, FL 33101"/></div>
+        <div class="fg full"><label class="flbl">Company Name</label><input class="fi" id="fco" placeholder="ABC Title Co."/></div>
+        <div class="fg full"><label class="flbl">Contact Emails (comma-separated)</label><input class="fi" id="fem" placeholder="john@example.com, jane@example.com"/></div>
+        <div class="fg"><label class="flbl">Parcel ID / APN</label><input class="fi" id="fp" placeholder="00-0000-000-0000"/></div>
+        <div class="fg"><label class="flbl">County</label><input class="fi" id="fc" placeholder="Miami-Dade"/></div>
+        <div class="fg"><label class="flbl">State</label><input class="fi" id="fst" placeholder="FL" maxlength="2"/></div>
+        <div class="fg"><label class="flbl">Certificate #</label><input class="fi" id="fn" placeholder="2024-FL-00001"/></div>
+        <div class="fg"><label class="flbl">Purchase Price ($)</label><input class="fi" id="fpr" type="number" placeholder="0.00" step="0.01" min="0"/></div>
+        <div class="fg"><label class="flbl">Interest Rate (%)</label><input class="fi" id="fir" type="number" placeholder="18" step="0.01"/></div>
+        <div class="fg"><label class="flbl">Redemption Deadline</label><input class="fi" id="fd" type="date"/></div>
+        <div class="fg full"><label class="flbl">Notes</label><textarea class="fta" id="fno" placeholder="Owner info, auction notes, liens…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <input type="hidden" id="feid"/>
+      <button class="btn btn-danger btn-sm" id="del-btn" onclick="delProp()" style="margin-right:auto;display:none">Delete</button>
+      <button class="btn btn-ghost" onclick="closeForm()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProp()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+const SB_URL  = 'https://zflmvuyulhnhmyaswmwi.supabase.co';
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbG12dXl1bGhuaG15YXN3bXdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczOTM5MTcsImV4cCI6MjA5Mjk2OTkxN30.EhR3fl-h_c-wkHU8MULvkyxyyv81nvrgqEC59N5h55M';
+const HEADERS = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'};
+const SK      = 'taxdeed_local_v3';
+
+// ── STEPS ───────────────────────────────────────────────
+const STEPS = [
+  {id:'cert_req',  label:'Certification Requested',        cat:'cert'},
+  {id:'cert_paid', label:'Certification Paid',              cat:'cert'},
+  {id:'cert_proc', label:'Certification in Process',        cat:'cert'},
+  {id:'cert_da',   label:'Certification Denied / Approved', cat:'cert'},
+  {id:'title_req', label:'Request Title Work / MunI',       cat:'title'},
+  {id:'title_paid',label:'Title Work Paid',                 cat:'title'},
+  {id:'title_prog',label:'Title Work in Progress',          cat:'title'},
+  {id:'title_rev', label:'Title Work Reviewed',             cat:'title'},
+  {id:'close_date',label:'Closing Date Chosen',             cat:'closing'},
+  {id:'close_paid',label:'Paid Final Certification Amount', cat:'closing'},
+  {id:'closed',    label:'Property Closed',                 cat:'done'},
+];
+const CAT_LBL = {cert:'Certification',title:'Title Work',closing:'Closing',done:'Completion'};
+
+// ── STATE ────────────────────────────────────────────────
+let DB = [];
+let filterCompany = '';
+let filterProg    = '';
+let allOpen       = false;
+let saveTimers    = {};
+let currentPage   = 1;
+
+// ── SUPABASE HELPERS ─────────────────────────────────────
+async function sbGet() {
+  const r = await fetch(`${SB_URL}/rest/v1/properties?order=updated_at.desc&select=*`, {headers:HEADERS});
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbUpsert(row) {
+  row.updated_at = new Date().toISOString();
+  const r = await fetch(`${SB_URL}/rest/v1/properties`, {
+    method:'POST', headers:{...HEADERS,'Prefer':'resolution=merge-duplicates,return=representation'},
+    body: JSON.stringify(row)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbDelete(id) {
+  const r = await fetch(`${SB_URL}/rest/v1/properties?id=eq.${id}`, {method:'DELETE', headers:HEADERS});
+  if (!r.ok) throw new Error(await r.text());
+}
+
+// ── REALTIME POLLING (fallback for GitHub Pages) ─────────
+let lastPoll = Date.now();
+function startPolling() {
+  setInterval(async () => {
+    try {
+      const remote = await sbGet();
+      const remoteMap = {};
+      remote.forEach(r => remoteMap[r.id] = r);
+      let changed = false;
+      remote.forEach(r => {
+        const local = DB.find(p => p.id === r.id);
+        if (!local || new Date(r.updated_at) > new Date(local.updated_at || 0)) {
+          const idx = DB.findIndex(p => p.id === r.id);
+          if (idx === -1) DB.unshift(r); else DB[idx] = r;
+          changed = true;
+        }
+      });
+      // Remove deleted
+      DB = DB.filter(p => remoteMap[p.id]);
+      if (changed) { saveLocal(); render(); }
+    } catch(e) {}
+  }, 8000);
+}
+
+// ── LOCAL STORAGE ────────────────────────────────────────
+function saveLocal() { try { localStorage.setItem(SK, JSON.stringify(DB)); } catch(e){} }
+function loadLocal() { try { return JSON.parse(localStorage.getItem(SK)) || []; } catch(e){ return []; } }
+
+// ── SYNC STATUS ──────────────────────────────────────────
+function setSyncStatus(s) {
+  const b = document.getElementById('sync-badge');
+  const t = document.getElementById('sync-txt');
+  b.className = 'sync-badge ' + s;
+  t.textContent = s === 'ok' ? 'Synced' : s === 'saving' ? 'Saving…' : 'Offline';
+}
+
+// ── INIT ─────────────────────────────────────────────────
+async function init() {
+  DB = loadLocal();
+  if (DB.length) { render(); }
+  try {
+    setSyncStatus('saving');
+    const remote = await sbGet();
+    DB = remote;
+    saveLocal();
+    setSyncStatus('ok');
+    render();
+  } catch(e) {
+    setSyncStatus('err');
+    toast('Could not reach Supabase — showing local data', 'err');
+    if (!DB.length) {
+      document.getElementById('empty-st').querySelector('p').textContent = 'No properties yet. Add your first certification!';
+    }
+  }
+  startPolling();
+}
+
+// ── UTILS ─────────────────────────────────────────────────
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function esc(s='') { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function fmtDate(d) { if(!d) return ''; return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function progress(p) {
+  if (!p.steps) return 0;
+  return Math.round(STEPS.filter(s=>p.steps[s.id]).length / STEPS.length * 100);
+}
+
+// ── DEBOUNCED FIELD SAVE ─────────────────────────────────
+function schedSave(id) {
+  if (saveTimers[id]) clearTimeout(saveTimers[id]);
+  saveTimers[id] = setTimeout(() => persistProp(id), 900);
+}
+async function persistProp(id) {
+  const p = DB.find(x=>x.id===id);
+  if (!p) return;
+  saveLocal();
+  setSyncStatus('saving');
+  try {
+    await sbUpsert({...p});
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('err');
+    toast('Save failed — check connection','err');
+  }
+}
+
+// ── FILTERS ──────────────────────────────────────────────
+function getFiltered() {
+  const q = (document.getElementById('search')?.value||'').toLowerCase();
+  const fst = document.getElementById('fstate')?.value||'';
+  return DB.filter(p => {
+    if (filterCompany && p.company !== filterCompany) return false;
+    if (fst && p.state !== fst) return false;
+    const pr = progress(p);
+    if (filterProg === 'partial' && (pr===0||pr===100)) return false;
+    if (filterProg === '100' && pr!==100) return false;
+    if (filterProg === '0' && pr!==0) return false;
+    if (q) {
+      const hay = [p.address,p.company,p.emails,p.cert,p.county,p.state,p.parcel,p.notes].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function setCompany(co, btn) {
+  filterCompany = co;
+  document.querySelectorAll('#company-list .sb-btn, #co-all').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+function setProgFilter(v, btn) {
+  filterProg = v;
+  document.querySelectorAll('.sb-nav .sb-btn').forEach(b => {
+    if (['','partial','100','0'].includes(b.dataset.pf)) b.classList.remove('active');
+  });
+  render();
+}
+
+function updateCompanyList() {
+  const companies = [...new Set(DB.map(p=>p.company).filter(Boolean))].sort();
+  const list = document.getElementById('company-list');
+  list.innerHTML = companies.map(co => `
+    <button class="sb-btn${filterCompany===co?' active':''}" onclick="setCompany('${esc(co)}',this)">
+      <span class="dot" style="background:var(--info)"></span> ${esc(co)}
+    </button>
+  `).join('');
+}
+
+function updateStateFilter() {
+  const sel = document.getElementById('fstate');
+  if (!sel) return;
+  const cur = sel.value;
+  const states = [...new Set(DB.map(p=>p.state).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">All States</option>' + states.map(s=>`<option${s===cur?' selected':''}>${s}</option>`).join('');
+}
+
+// ── STATS ─────────────────────────────────────────────────
+function updateStats() {
+  const all = DB;
+  document.getElementById('st-total').textContent = all.length;
+  document.getElementById('sb-count').textContent = all.length;
+  const inv = all.reduce((s,p)=>s+(Number(p.price)||0),0);
+  const ifmt = '$'+inv.toLocaleString('en-US',{maximumFractionDigits:0});
+  document.getElementById('st-inv').textContent = ifmt;
+  document.getElementById('sb-inv').textContent = ifmt;
+  const rates = all.filter(p=>p.rate).map(p=>Number(p.rate));
+  document.getElementById('st-rate').textContent = rates.length ? (rates.reduce((a,b)=>a+b,0)/rates.length).toFixed(1)+'%' : '—';
+  const progs = all.map(p=>progress(p));
+  document.getElementById('st-prog').textContent = progs.length ? Math.round(progs.reduce((a,b)=>a+b,0)/progs.length)+'%' : '0%';
+  const closed = all.filter(p=>p.steps?.closed).length;
+  document.getElementById('st-closed').textContent = closed;
+  document.getElementById('sb-closed').textContent = closed;
+}
+
+// ── RENDER ────────────────────────────────────────────────
+function render() {
+  updateStats();
+  updateCompanyList();
+  updateStateFilter();
+  const items = getFiltered();
+  const wrap = document.getElementById('props-wrap');
+  wrap.querySelectorAll('.prop-card,.add-between').forEach(el=>el.remove());
+  const empty = document.getElementById('empty-st');
+  if (!items.length) {
+    empty.style.display = 'block';
+    empty.querySelector('p').textContent = DB.length ? 'No properties match your filters.' : 'No properties yet. Add your first!';
+    return;
+  }
+  empty.style.display = 'none';
+  items.forEach((p, i) => {
+    wrap.appendChild(buildCard(p));
+    wrap.appendChild(buildAddBetween());
+  });
+}
+
+function buildCard(p) {
+  const pr = progress(p);
+  const card = document.createElement('div');
+  card.className = 'prop-card' + (allOpen ? ' open' : '');
+  card.dataset.id = p.id;
+
+  // Steps HTML
+  let stepsHtml = '';
+  let lastCat = null;
+  STEPS.forEach((s,i) => {
+    if (s.cat !== lastCat) { stepsHtml += `<div class="cat-div">${CAT_LBL[s.cat]}</div>`; lastCat = s.cat; }
+    const done = !!(p.steps && p.steps[s.id]);
+    stepsHtml += `<div class="step${done?' done':''}" data-cat="${s.cat}" onclick="toggleStep('${p.id}','${s.id}',this)">
+      <div class="step-num">${i+1}</div>
+      <div class="step-lbl">${s.label}</div>
+      <div class="step-chk">✓</div>
+    </div>`;
+  });
+
+  const prColor = pr===100?'var(--teal)':pr>0?'var(--acc)':'var(--txt3)';
+  const chips = [
+    p.parcel ? `<span class="chip">${esc(p.parcel)}</span>` : '',
+    p.cert   ? `<span class="chip">${esc(p.cert)}</span>`   : '',
+    (p.county||p.state) ? `<span class="chip">${esc([p.county,p.state].filter(Boolean).join(', '))}</span>` : '',
+    p.price  ? `<span class="chip">$${Number(p.price).toLocaleString('en-US',{maximumFractionDigits:0})}</span>` : '',
+    p.rate   ? `<span class="chip">${p.rate}% int.</span>` : '',
+    p.deadline ? `<span class="chip">${fmtDate(p.deadline)}</span>` : '',
+  ].join('');
+
+  // Email pills
+  const emailPills = (p.emails||'').split(',').map(e=>e.trim()).filter(Boolean)
+    .map(e=>`<a href="mailto:${esc(e)}" style="color:var(--info);font-size:12px;font-family:var(--fm);text-decoration:none" onclick="event.stopPropagation()">${esc(e)}</a>`)
+    .join('<span style="color:var(--txt3);margin:0 4px">·</span>');
+
+  card.innerHTML = `
+    <div class="card-hd" onclick="toggleCard(this)">
+      <div class="card-hd-top">
+        <div class="card-hd-fields">
+          <input class="field-address" value="${esc(p.address)}" placeholder="Property Address"
+            onclick="event.stopPropagation()"
+            oninput="fieldUpdate('${p.id}','address',this.value)"
+            onfocus="event.stopPropagation()" />
+          <div class="hd-row">
+            <span class="field-label">Company</span>
+            <input class="field-inline" value="${esc(p.company||'')}" placeholder="Company name"
+              onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
+              oninput="fieldUpdate('${p.id}','company',this.value)" style="font-weight:600" />
+            <span class="field-label" style="margin-left:6px">Emails</span>
+            <input class="field-inline" value="${esc(p.emails||'')}" placeholder="email1@co.com, email2@co.com"
+              onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
+              oninput="fieldUpdate('${p.id}','emails',this.value)" style="min-width:220px" />
+          </div>
+        </div>
+        <div class="card-hd-actions">
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEdit('${p.id}')">Edit</button>
+          <div class="chevron">▾</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      ${chips}
+      <span class="prog-label" style="color:${prColor}">${pr}% complete</span>
+      ${emailPills ? `<span style="color:var(--txt3);margin:0 2px">|</span>${emailPills}` : ''}
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${pr}%"></div></div>
+    <div class="steps-grid">${stepsHtml}</div>
+    <div class="notes-row">
+      <div class="notes-lbl">Notes</div>
+      <div class="notes-display${p.notes?'':' empty'}" onclick="editNotes('${p.id}',this)">${p.notes?esc(p.notes):'Click to add notes…'}</div>
+    </div>
+  `;
+  return card;
+}
+
+function buildAddBetween() {
+  const div = document.createElement('div');
+  div.className = 'add-between';
+  div.innerHTML = `<div class="add-line"></div><button class="add-between-btn" onclick="openAdd()">+ Add Property</button><div class="add-line"></div>`;
+  return div;
+}
+
+// ── INTERACTIONS ─────────────────────────────────────────
+function toggleCard(hd) { hd.closest('.prop-card').classList.toggle('open'); }
+
+function toggleExpandAll() {
+  allOpen = !allOpen;
+  document.querySelectorAll('.prop-card').forEach(c=>c.classList.toggle('open',allOpen));
+  document.getElementById('exp-btn').textContent = allOpen ? 'Collapse All' : 'Expand All';
+}
+
+function fieldUpdate(id, field, value) {
+  const p = DB.find(x=>x.id===id);
+  if (!p) return;
+  p[field] = value;
+  schedSave(id);
+  if (field==='company') updateCompanyList();
+}
+
+function toggleStep(propId, stepId, el) {
+  const p = DB.find(x=>x.id===propId);
+  if (!p) return;
+  if (!p.steps) p.steps = {};
+  p.steps[stepId] = !p.steps[stepId];
+  el.classList.toggle('done', p.steps[stepId]);
+  const card = el.closest('.prop-card');
+  const pr = progress(p);
+  card.querySelector('.prog-fill').style.width = pr+'%';
+  const prColor = pr===100?'var(--teal)':pr>0?'var(--acc)':'var(--txt3)';
+  const lbl = card.querySelector('.prog-label');
+  if (lbl) { lbl.style.color=prColor; lbl.textContent=pr+'% complete'; }
+  updateStats();
+  schedSave(propId);
+  toast(p.steps[stepId]?'✓ Step complete':'Step unchecked','ok');
+}
+
+function editNotes(propId, el) {
+  const p = DB.find(x=>x.id===propId);
+  if (!p) return;
+  const ta = document.createElement('textarea');
+  ta.className = 'notes-input';
+  ta.value = p.notes||'';
+  ta.placeholder = 'Add notes…';
+  el.replaceWith(ta);
+  ta.focus();
+  ta.addEventListener('blur', () => {
+    p.notes = ta.value.trim();
+    schedSave(propId);
+    const nd = document.createElement('div');
+    nd.className = 'notes-display'+(p.notes?'':' empty');
+    nd.textContent = p.notes||'Click to add notes…';
+    nd.onclick = () => editNotes(propId, nd);
+    ta.replaceWith(nd);
+  });
+}
+
+// ── ADD / EDIT MODAL ─────────────────────────────────────
+function openAdd() {
+  clearForm();
+  document.getElementById('feid').value = '';
+  document.getElementById('form-ttl').textContent = 'Add Property';
+  document.getElementById('del-btn').style.display = 'none';
+  document.getElementById('form-ov').classList.add('open');
+}
+function openEdit(id) {
+  const p = DB.find(x=>x.id===id);
+  if (!p) return;
+  document.getElementById('feid').value = id;
+  document.getElementById('form-ttl').textContent = 'Edit Property';
+  document.getElementById('del-btn').style.display = 'inline-flex';
+  document.getElementById('fa').value  = p.address||'';
+  document.getElementById('fco').value = p.company||'';
+  document.getElementById('fem').value = p.emails||'';
+  document.getElementById('fp').value  = p.parcel||'';
+  document.getElementById('fc').value  = p.county||'';
+  document.getElementById('fst').value = p.state||'';
+  document.getElementById('fn').value  = p.cert||'';
+  document.getElementById('fpr').value = p.price||'';
+  document.getElementById('fir').value = p.rate||'';
+  document.getElementById('fd').value  = p.deadline||'';
+  document.getElementById('fno').value = p.notes||'';
+  document.getElementById('form-ov').classList.add('open');
+}
+function clearForm() {
+  ['fa','fco','fem','fp','fc','fst','fn','fpr','fir','fd','fno'].forEach(id=>document.getElementById(id).value='');
+}
+function closeForm() { document.getElementById('form-ov').classList.remove('open'); }
+function ovClick(e) { if(e.target===document.getElementById('form-ov')) closeForm(); }
+
+async function saveProp() {
+  const addr = document.getElementById('fa').value.trim();
+  if (!addr) { toast('Address is required','err'); return; }
+  const eid = document.getElementById('feid').value;
+  const entry = {
+    id: eid||uid(),
+    address: addr,
+    company: document.getElementById('fco').value.trim(),
+    emails:  document.getElementById('fem').value.trim(),
+    parcel:  document.getElementById('fp').value.trim(),
+    county:  document.getElementById('fc').value.trim(),
+    state:   document.getElementById('fst').value.trim().toUpperCase(),
+    cert:    document.getElementById('fn').value.trim(),
+    price:   document.getElementById('fpr').value||0,
+    rate:    document.getElementById('fir').value||0,
+    deadline:document.getElementById('fd').value,
+    notes:   document.getElementById('fno').value.trim(),
+    steps:   {},
+    updated_at: new Date().toISOString(),
+  };
+  if (eid) {
+    const idx = DB.findIndex(x=>x.id===eid);
+    if (idx!==-1) { entry.steps = DB[idx].steps||{}; DB[idx]=entry; }
+  } else { DB.unshift(entry); }
+  closeForm(); render();
+  setSyncStatus('saving');
+  try { await sbUpsert(entry); setSyncStatus('ok'); toast(eid?'Property updated':'Property added','ok'); }
+  catch(e) { setSyncStatus('err'); toast('Saved locally — sync failed','err'); }
+}
+
+async function delProp() {
+  const eid = document.getElementById('feid').value;
+  const p = DB.find(x=>x.id===eid);
+  if (!confirm(`Delete "${p?.address}"? This cannot be undone.`)) return;
+  DB = DB.filter(x=>x.id!==eid);
+  closeForm(); render(); saveLocal();
+  try { await sbDelete(eid); toast('Property deleted','ok'); }
+  catch(e) { toast('Deleted locally — sync failed','err'); }
+}
+
+// ── EXPORT JSON ──────────────────────────────────────────
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `taxdeed-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('JSON backup downloaded','info');
+}
+
+// ── PAGE NAV ─────────────────────────────────────────────
+function showPage(n) {
+  currentPage = n;
+  document.getElementById('page1').style.display = n===1 ? 'flex' : 'none';
+  document.getElementById('page1').style.flexDirection = n===1 ? 'column' : '';
+  document.getElementById('page2').style.display = n===2 ? 'flex' : 'none';
+  document.getElementById('nav-p1').classList.toggle('active', n===1);
+  document.getElementById('nav-p2').classList.toggle('active', n===2);
+}
+
+// ── TOAST ────────────────────────────────────────────────
+function toast(msg, type='ok') {
+  const wrap = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = 'toast '+type;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(), 3000);
+}
+
+// ── START ─────────────────────────────────────────────────
+showPage(1);
+init();
+</script>
+</body>
+</html>
