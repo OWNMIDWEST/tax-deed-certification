@@ -8,15 +8,15 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0b0d0c;--surf:#131614;--surf2:#191c1a;--surf3:#1f2320;
-  --bdr:rgba(255,255,255,0.07);--bdr2:rgba(255,255,255,0.13);
-  --txt:#e2e9e2;--txt2:#7a8b7a;--txt3:#48554a;
-  --acc:#b6e84a;--acc-dim:rgba(182,232,74,0.1);--acc-dk:#0b1900;
-  --info:#58c1e5;--info-dim:rgba(88,193,229,0.1);
-  --pur:#ae82f8;--pur-dim:rgba(174,130,248,0.1);
-  --teal:#32d190;--teal-dim:rgba(50,209,144,0.1);
-  --warn:#f4c63e;--warn-dim:rgba(244,198,62,0.1);
-  --dng:#ff6a58;--dng-dim:rgba(255,106,88,0.1);
+  --bg:#f4f6f4;--surf:#ffffff;--surf2:#f0f2f0;--surf3:#e8ece8;
+  --bdr:rgba(0,0,0,0.08);--bdr2:rgba(0,0,0,0.15);
+  --txt:#1a211a;--txt2:#5a6b5a;--txt3:#8fa08f;
+  --acc:#3a7d1e;--acc-dim:rgba(58,125,30,0.09);--acc-dk:#ffffff;
+  --info:#1a7fa8;--info-dim:rgba(26,127,168,0.09);
+  --pur:#6d3fc7;--pur-dim:rgba(109,63,199,0.09);
+  --teal:#0e9e65;--teal-dim:rgba(14,158,101,0.09);
+  --warn:#b07a00;--warn-dim:rgba(176,122,0,0.09);
+  --dng:#c93b2a;--dng-dim:rgba(201,59,42,0.09);
   --r:10px;--rl:14px;
   --fh:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'IBM Plex Mono',monospace
 }
@@ -348,9 +348,29 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
       <span class="page-icon">⚖️</span> Quiet Title
     </button>
 
-    <span class="sb-lbl" style="margin-top:14px">Filter by Company</span>
+    <span class="sb-lbl" style="margin-top:14px">Quick Jump</span>
     <button class="sb-btn active" id="co-all" onclick="setCompany('',this)">
       <span class="dot" style="background:var(--txt3)"></span> All Companies
+    </button>
+    <button class="sb-btn" id="co-IVP" onclick="setCompany('IVP',this)">
+      <span class="dot" style="background:#1a7fa8"></span>
+      <span style="font-family:var(--fm);font-weight:700;letter-spacing:.04em">IVP</span>
+      <span id="cnt-IVP" style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--txt3)"></span>
+    </button>
+    <button class="sb-btn" id="co-JJF" onclick="setCompany('JJF',this)">
+      <span class="dot" style="background:#6d3fc7"></span>
+      <span style="font-family:var(--fm);font-weight:700;letter-spacing:.04em">JJF</span>
+      <span id="cnt-JJF" style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--txt3)"></span>
+    </button>
+    <button class="sb-btn" id="co-JEF" onclick="setCompany('JEF',this)">
+      <span class="dot" style="background:#0e9e65"></span>
+      <span style="font-family:var(--fm);font-weight:700;letter-spacing:.04em">JEF</span>
+      <span id="cnt-JEF" style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--txt3)"></span>
+    </button>
+    <button class="sb-btn" id="co-MPI" onclick="setCompany('MPI',this)">
+      <span class="dot" style="background:#b07a00"></span>
+      <span style="font-family:var(--fm);font-weight:700;letter-spacing:.04em">MPI</span>
+      <span id="cnt-MPI" style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--txt3)"></span>
     </button>
     <div id="company-list"></div>
 
@@ -397,8 +417,6 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 
     <div class="stats-bar">
       <div class="st"><div class="st-lbl">Properties</div><div class="st-val g" id="st-total">0</div></div>
-      <div class="st"><div class="st-lbl">Total Invested</div><div class="st-val b" id="st-inv">$0</div></div>
-      <div class="st"><div class="st-lbl">Avg Interest</div><div class="st-val a" id="st-rate">—</div></div>
       <div class="st"><div class="st-lbl">Avg Progress</div><div class="st-val t" id="st-prog">0%</div></div>
       <div class="st"><div class="st-lbl">Fully Closed</div><div class="st-val g" id="st-closed">0</div></div>
     </div>
@@ -461,6 +479,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
         <div class="fg"><label class="flbl">Purchase Price ($)</label><input class="fi" id="fpr" type="number" placeholder="0.00" step="0.01" min="0"/></div>
         <div class="fg"><label class="flbl">Interest Rate (%)</label><input class="fi" id="fir" type="number" placeholder="18" step="0.01"/></div>
         <div class="fg"><label class="flbl">Redemption Deadline</label><input class="fi" id="fd" type="date"/></div>
+        <div class="fg"><label class="flbl">Date Started</label><input class="fi" id="fds" type="date"/></div>
         <div class="fg full"><label class="flbl">Notes</label><textarea class="fta" id="fno" placeholder="Owner info, auction notes, liens…"></textarea></div>
       </div>
     </div>
@@ -632,7 +651,12 @@ function getFiltered() {
 
 function setCompany(co, btn) {
   filterCompany = co;
-  document.querySelectorAll('#company-list .sb-btn, #co-all').forEach(b=>b.classList.remove('active'));
+  // Clear all company buttons (pinned + dynamic)
+  ['co-all','co-IVP','co-JJF','co-JEF','co-MPI'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  document.querySelectorAll('#company-list .sb-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   render();
 }
@@ -645,9 +669,20 @@ function setProgFilter(v, btn) {
 }
 
 function updateCompanyList() {
-  const companies = [...new Set(DB.map(p=>p.company).filter(Boolean))].sort();
+  // Update pinned company counts
+  const PINNED = ['IVP','JJF','JEF','MPI'];
+  PINNED.forEach(co => {
+    const cnt = DB.filter(p => p.company === co).length;
+    const el = document.getElementById('cnt-'+co);
+    if (el) el.textContent = cnt > 0 ? cnt : '';
+    const btn = document.getElementById('co-'+co);
+    if (btn) btn.classList.toggle('active', filterCompany === co);
+  });
+  // Also show any other companies not in pinned list
+  const others = [...new Set(DB.map(p=>p.company).filter(Boolean))].sort()
+    .filter(co => !PINNED.includes(co));
   const list = document.getElementById('company-list');
-  list.innerHTML = companies.map(co => `
+  list.innerHTML = others.map(co => `
     <button class="sb-btn${filterCompany===co?' active':''}" onclick="setCompany('${esc(co)}',this)">
       <span class="dot" style="background:var(--info)"></span> ${esc(co)}
     </button>
@@ -669,10 +704,7 @@ function updateStats() {
   document.getElementById('sb-count').textContent = all.length;
   const inv = all.reduce((s,p)=>s+(Number(p.price)||0),0);
   const ifmt = '$'+inv.toLocaleString('en-US',{maximumFractionDigits:0});
-  document.getElementById('st-inv').textContent = ifmt;
   document.getElementById('sb-inv').textContent = ifmt;
-  const rates = all.filter(p=>p.rate).map(p=>Number(p.rate));
-  document.getElementById('st-rate').textContent = rates.length ? (rates.reduce((a,b)=>a+b,0)/rates.length).toFixed(1)+'%' : '—';
   const progs = all.map(p=>progress(p));
   document.getElementById('st-prog').textContent = progs.length ? Math.round(progs.reduce((a,b)=>a+b,0)/progs.length)+'%' : '0%';
   const closed = all.filter(p=>p.steps?.closed).length;
@@ -727,7 +759,8 @@ function buildCard(p) {
     (p.county||p.state) ? `<span class="chip">${esc([p.county,p.state].filter(Boolean).join(', '))}</span>` : '',
     p.price  ? `<span class="chip">$${Number(p.price).toLocaleString('en-US',{maximumFractionDigits:0})}</span>` : '',
     p.rate   ? `<span class="chip">${p.rate}% int.</span>` : '',
-    p.deadline ? `<span class="chip">${fmtDate(p.deadline)}</span>` : '',
+    p.date_started ? `<span class="chip">Started: ${fmtDate(p.date_started)}</span>` : '',
+    p.deadline ? `<span class="chip">Deadline: ${fmtDate(p.deadline)}</span>` : '',
   ].join('');
 
   // Email pills
@@ -860,11 +893,12 @@ function openEdit(id) {
   document.getElementById('fpr').value = p.price||'';
   document.getElementById('fir').value = p.rate||'';
   document.getElementById('fd').value  = p.deadline||'';
+  document.getElementById('fds').value = p.date_started||'';
   document.getElementById('fno').value = p.notes||'';
   document.getElementById('form-ov').classList.add('open');
 }
 function clearForm() {
-  ['fa','fco','fem','fp','fc','fst','fn','fpr','fir','fd','fno'].forEach(id=>document.getElementById(id).value='');
+  ['fa','fco','fem','fp','fc','fst','fn','fpr','fir','fd','fds','fno'].forEach(id=>document.getElementById(id).value='');
 }
 function closeForm() { document.getElementById('form-ov').classList.remove('open'); }
 function ovClick(e) { if(e.target===document.getElementById('form-ov')) closeForm(); }
@@ -885,6 +919,7 @@ async function saveProp() {
     price:   document.getElementById('fpr').value||0,
     rate:    document.getElementById('fir').value||0,
     deadline:document.getElementById('fd').value,
+    date_started:document.getElementById('fds').value,
     notes:   document.getElementById('fno').value.trim(),
     steps:   {},
     updated_at: new Date().toISOString(),
