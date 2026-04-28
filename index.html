@@ -567,8 +567,6 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
         <div class="fg"><label class="flbl">County</label><input class="fi" id="fc" placeholder="Miami-Dade"/></div>
         <div class="fg"><label class="flbl">State</label><input class="fi" id="fst" placeholder="FL" maxlength="2"/></div>
         <div class="fg"><label class="flbl">Certificate #</label><input class="fi" id="fn" placeholder="2024-FL-00001"/></div>
-        <div class="fg"><label class="flbl">Purchase Price ($)</label><input class="fi" id="fpr" type="number" placeholder="0.00" step="0.01" min="0"/></div>
-        <div class="fg"><label class="flbl">Interest Rate (%)</label><input class="fi" id="fir" type="number" placeholder="18" step="0.01"/></div>
         <div class="fg"><label class="flbl">Date Started</label><input class="fi" id="fds" type="date"/></div>
         <div class="fg full"><label class="flbl">Notes</label><textarea class="fta" id="fno" placeholder="Owner info, auction notes, liens…"></textarea></div>
       </div>
@@ -595,7 +593,7 @@ const SK      = 'taxdeed_local_v3';
 const STEPS = [
   {id:'cert_req',  label:'Certification Requested',        cat:'cert'},
   {id:'cert_paid', label:'Certification Paid',              cat:'cert'},
-  {id:'cert_proc', label:'Certification in Process',        cat:'cert'},
+  {id:'cert_proc', label:'Certification Evaluation',        cat:'cert'},
   {id:'cert_da',   label:'Certification Denied / Approved', cat:'cert'},
   {id:'title_req', label:'Request Title Work / MunI',       cat:'title'},
   {id:'title_paid',label:'Title Work Paid',                 cat:'title'},
@@ -696,6 +694,7 @@ async function init() {
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 function esc(s='') { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 function fmtDate(d) { if(!d) return ''; return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function daysElapsed(d) { if(!d) return 0; const start = new Date(d+'T00:00:00'); const now = new Date(); now.setHours(0,0,0,0); return Math.max(0, Math.round((now-start)/86400000)); }
 function progress(p) {
   if (!p.steps) return 0;
   return Math.round(STEPS.filter(s=>p.steps[s.id]).length / STEPS.length * 100);
@@ -840,7 +839,7 @@ function buildCard(p) {
     (p.county||p.state) ? `<span class="chip">${esc([p.county,p.state].filter(Boolean).join(', '))}</span>` : '',
     p.price  ? `<span class="chip">$${Number(p.price).toLocaleString('en-US',{maximumFractionDigits:0})}</span>` : '',
     p.rate   ? `<span class="chip">${p.rate}% int.</span>` : '',
-    p.date_started ? `<span class="chip">Started: ${fmtDate(p.date_started)}</span>` : '',
+    p.date_started ? `<span class="chip">Started: ${fmtDate(p.date_started)}<span style="color:#c97a00;font-weight:600;margin-left:6px">${daysElapsed(p.date_started)}d</span></span>` : '',
     p.deadline ? `<span class="chip">Deadline: ${fmtDate(p.deadline)}</span>` : '',
   ].join('');
 
@@ -994,15 +993,13 @@ function openEdit(id) {
   document.getElementById('fc').value  = p.county||'';
   document.getElementById('fst').value = p.state||'';
   document.getElementById('fn').value  = p.cert||'';
-  document.getElementById('fpr').value = p.price||'';
-  document.getElementById('fir').value = p.rate||'';
   document.getElementById('fds').value = p.date_started||'';
   setEmailTags((p.emails||'').split(',').map(e=>e.trim()).filter(Boolean));
   document.getElementById('fno').value = p.notes||'';
   document.getElementById('form-ov').classList.add('open');
 }
 function clearForm() {
-  ['fa','fp','fc','fst','fn','fpr','fir','fds','fno'].forEach(id=>document.getElementById(id).value=''); clearEmailTags();
+  ['fa','fp','fc','fst','fn','fds','fno'].forEach(id=>document.getElementById(id).value=''); clearEmailTags();
 }
 function closeForm() { document.getElementById('form-ov').classList.remove('open'); }
 function ovClick(e) { if(e.target===document.getElementById('form-ov')) closeForm(); }
@@ -1020,8 +1017,6 @@ async function saveProp() {
     county:  document.getElementById('fc').value.trim(),
     state:   document.getElementById('fst').value.trim().toUpperCase(),
     cert:    document.getElementById('fn').value.trim(),
-    price:   document.getElementById('fpr').value||0,
-    rate:    document.getElementById('fir').value||0,
     deadline:'',
     date_started:document.getElementById('fds').value,
     notes:   document.getElementById('fno').value.trim(),
