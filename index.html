@@ -430,6 +430,58 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
   font-size:14px;line-height:1;padding:0 2px;flex-shrink:0;transition:color .14s
 }
 .extra-doc-del:hover{color:var(--dng)}
+
+/* VISITS BUTTON */
+.visits-btn{
+  display:flex;align-items:center;gap:7px;width:100%;
+  padding:9px 16px;border:none;background:none;
+  border-top:1px solid var(--bdr);cursor:pointer;
+  font-family:var(--fb);font-size:11px;color:var(--txt3);
+  transition:all .14s;text-align:left
+}
+.visits-btn:hover{background:var(--surf2);color:var(--txt2)}
+.visits-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* VISITS MODAL */
+.visits-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
+  display:flex;align-items:flex-end;justify-content:flex-start;
+  padding:0 0 70px 12px;
+  opacity:0;pointer-events:none;transition:opacity .2s
+}
+.visits-overlay.open{opacity:1;pointer-events:all}
+.visits-panel{
+  background:var(--surf);border:1px solid var(--bdr2);
+  border-radius:var(--rl);width:320px;
+  box-shadow:0 12px 40px rgba(0,0,0,.25);
+  transform:translateY(12px);transition:transform .2s;
+  overflow:hidden
+}
+.visits-overlay.open .visits-panel{transform:translateY(0)}
+.visits-panel-hd{
+  padding:14px 18px 12px;border-bottom:1px solid var(--bdr);
+  display:flex;justify-content:space-between;align-items:center
+}
+.visits-panel-ttl{font-family:var(--fh);font-size:14px;font-weight:700}
+.visits-panel-x{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:18px;line-height:1}
+.visits-panel-x:hover{color:var(--txt)}
+
+.visits-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--bdr);border-bottom:1px solid var(--bdr)}
+.vstat{background:var(--surf);padding:12px 10px;text-align:center}
+.vstat-val{font-family:var(--fh);font-size:20px;font-weight:700;color:var(--teal)}
+.vstat-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;font-weight:600}
+
+.visits-list{max-height:240px;overflow-y:auto;padding:8px 0}
+.visit-row{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 18px;font-size:11px;color:var(--txt2);
+  border-bottom:1px solid var(--bdr)
+}
+.visit-row:last-child{border-bottom:none}
+.visit-time{font-family:var(--fm);font-size:10px;color:var(--txt3);white-space:nowrap;flex-shrink:0}
+.visit-info{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--fm);font-size:10px}
+.visits-loading{text-align:center;padding:20px;color:var(--txt3);font-size:12px}
 </style>
 </head>
 <body>
@@ -478,6 +530,11 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
     <div class="sb-stat">Invested <span id="sb-inv">$0</span></div>
     <div class="sb-stat">Closed <span id="sb-closed">0</span></div>
   </div>
+  <button class="visits-btn" onclick="openVisits()">
+    <span class="visits-dot"></span>
+    Site Visits
+    <span id="visits-total-badge" style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--teal)"></span>
+  </button>
   <div class="sb-foot">v3.0 · Supabase Sync</div>
 </aside>
 
@@ -581,6 +638,24 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 </div>
 
 <div class="toast-wrap" id="toasts"></div>
+
+<!-- VISITS PANEL -->
+<div class="visits-overlay" id="visits-ov" onclick="visitsOvClick(event)">
+  <div class="visits-panel">
+    <div class="visits-panel-hd">
+      <div class="visits-panel-ttl">Site Visits</div>
+      <button class="visits-panel-x" onclick="closeVisits()">×</button>
+    </div>
+    <div class="visits-stats">
+      <div class="vstat"><div class="vstat-val" id="v-total">—</div><div class="vstat-lbl">Total</div></div>
+      <div class="vstat"><div class="vstat-val" id="v-today">—</div><div class="vstat-lbl">Today</div></div>
+      <div class="vstat"><div class="vstat-val" id="v-week">—</div><div class="vstat-lbl">This Week</div></div>
+    </div>
+    <div class="visits-list" id="visits-list">
+      <div class="visits-loading">Loading…</div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────
@@ -688,6 +763,7 @@ async function init() {
     }
   }
   startPolling();
+  logVisit();
 }
 
 // ── UTILS ─────────────────────────────────────────────────
@@ -1283,6 +1359,80 @@ async function deleteExtraDoc(propId, idx) {
   if (area) area.innerHTML = buildExtraDocsHtml(p);
   toast('File removed', 'ok');
 }
+
+
+// ── VISIT TRACKING ───────────────────────────────────────────────────────────
+async function logVisit() {
+  try {
+    const ua = navigator.userAgent;
+    const browser = ua.includes('Chrome') ? 'Chrome' : ua.includes('Firefox') ? 'Firefox' : ua.includes('Safari') ? 'Safari' : ua.includes('Edge') ? 'Edge' : 'Other';
+    const os = ua.includes('Windows') ? 'Windows' : ua.includes('Mac') ? 'macOS' : ua.includes('iPhone')||ua.includes('iPad') ? 'iOS' : ua.includes('Android') ? 'Android' : 'Other';
+    const screen_size = window.innerWidth + 'x' + window.innerHeight;
+    await fetch(`${SB_URL}/rest/v1/visits`, {
+      method: 'POST',
+      headers: {...HEADERS, 'Prefer': 'return=minimal'},
+      body: JSON.stringify({
+        id: uid(),
+        visited_at: new Date().toISOString(),
+        browser, os, screen_size
+      })
+    });
+    refreshVisitBadge();
+  } catch(e) { /* silent fail */ }
+}
+
+async function refreshVisitBadge() {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/visits?select=id`, {headers: HEADERS});
+    const rows = await r.json();
+    const badge = document.getElementById('visits-total-badge');
+    if (badge && Array.isArray(rows)) badge.textContent = rows.length;
+  } catch(e) {}
+}
+
+async function openVisits() {
+  document.getElementById('visits-ov').classList.add('open');
+  document.getElementById('visits-list').innerHTML = '<div class="visits-loading">Loading…</div>';
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/visits?order=visited_at.desc&limit=100&select=*`, {headers: HEADERS});
+    const rows = await r.json();
+    if (!Array.isArray(rows)) throw new Error('bad response');
+
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0,10);
+    const weekAgo = new Date(now - 7*86400000);
+
+    const total = rows.length;
+    const today = rows.filter(r => r.visited_at.slice(0,10) === todayStr).length;
+    const week  = rows.filter(r => new Date(r.visited_at) >= weekAgo).length;
+
+    document.getElementById('v-total').textContent = total;
+    document.getElementById('v-today').textContent = today;
+    document.getElementById('v-week').textContent  = week;
+
+    const badge = document.getElementById('visits-total-badge');
+    if (badge) badge.textContent = total;
+
+    const list = document.getElementById('visits-list');
+    if (!rows.length) {
+      list.innerHTML = '<div class="visits-loading">No visits recorded yet.</div>';
+      return;
+    }
+    list.innerHTML = rows.slice(0,50).map(r => {
+      const d = new Date(r.visited_at);
+      const timeStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      return `<div class="visit-row">
+        <span class="visit-time">${timeStr}</span>
+        <span class="visit-info">${r.browser} · ${r.os} · ${r.screen_size||''}</span>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('visits-list').innerHTML = '<div class="visits-loading">Could not load visits.</div>';
+  }
+}
+
+function closeVisits() { document.getElementById('visits-ov').classList.remove('open'); }
+function visitsOvClick(e) { if (e.target === document.getElementById('visits-ov')) closeVisits(); }
 
 </script>
 </body>
