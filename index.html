@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Tax Deed Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -138,19 +138,20 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 
 /* CARD HEADER — editable fields */
 .card-hd{
-  padding:16px 20px 0;cursor:pointer;
+  padding:16px 20px 0;
   display:flex;flex-direction:column;gap:0
 }
 .card-hd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:12px}
 .card-hd-fields{flex:1;display:flex;flex-direction:column;gap:8px}
 
 .field-address{
-  font-family:var(--fh);font-size:19px;font-weight:800;
+  font-family:'Playfair Display',serif;font-size:22px;font-weight:700;
   background:transparent;border:none;border-bottom:1px dashed transparent;
   color:var(--txt);width:100%;outline:none;cursor:pointer;
-  transition:border-color .15s;padding:8px 0 6px;letter-spacing:-.01em;line-height:1.3
+  transition:border-color .15s;padding:10px 0 8px;letter-spacing:.01em;line-height:1.4;
+  font-style:italic
 }
-.field-address:hover,.field-address:focus{border-bottom-color:var(--bdr2);cursor:text;background:rgba(0,0,0,.03);border-radius:4px 4px 0 0;padding:8px 8px 6px}
+.field-address:hover,.field-address:focus{border-bottom-color:var(--bdr2);cursor:text;background:rgba(0,0,0,.03);border-radius:4px 4px 0 0;padding:10px 8px 8px}
 
 .hd-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .field-inline{
@@ -380,6 +381,34 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 }
 .foia-del:hover{background:var(--dng-dim);border-color:rgba(201,59,42,.3)}
 .foia-uploading{font-size:12px;color:var(--txt3);font-family:var(--fm)}
+
+/* TOGGLE BAR */
+.toggle-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:10px 20px;
+  background:var(--surf2);border:none;border-top:1px solid var(--bdr);
+  cursor:pointer;transition:background .15s;gap:12px;
+  font-family:var(--fb);
+}
+.toggle-bar:hover{background:var(--surf3)}
+.prop-card.open .toggle-bar{background:var(--surf3);border-bottom:1px solid var(--bdr)}
+.toggle-bar-left{display:flex;align-items:center;gap:8px;flex:1}
+.toggle-bar-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.toggle-label{font-size:12px;font-weight:600;color:var(--txt2);letter-spacing:.02em}
+.toggle-bar:hover .toggle-label{color:var(--acc)}
+.toggle-chevron{color:var(--txt3);transition:transform .22s;flex-shrink:0}
+.prop-card.open .toggle-bar .toggle-chevron{transform:rotate(180deg)}
+.prop-card.open .toggle-bar .toggle-label{color:var(--acc)}
+.toggle-steps-preview{display:flex;align-items:center;gap:5px}
+.mini-step{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--bdr2);border:1px solid var(--bdr2);
+  display:inline-block;transition:all .15s;flex-shrink:0
+}
+.mini-step.mini-done[data-cat=cert]{background:var(--info);border-color:var(--info)}
+.mini-step.mini-done[data-cat=title]{background:var(--pur);border-color:var(--pur)}
+.mini-step.mini-done[data-cat=closing]{background:var(--acc);border-color:var(--acc)}
+.mini-step.mini-done[data-cat=done]{background:var(--teal);border-color:var(--teal)}
 </style>
 </head>
 <body>
@@ -670,6 +699,7 @@ function progress(p) {
   if (!p.steps) return 0;
   return Math.round(STEPS.filter(s=>p.steps[s.id]).length / STEPS.length * 100);
 }
+function stepsDone(p) { return p.steps ? STEPS.filter(s=>p.steps[s.id]).length : 0; }
 
 // ── DEBOUNCED FIELD SAVE ─────────────────────────────────
 function schedSave(id) {
@@ -829,7 +859,7 @@ function buildCard(p) {
     .join('<span style="color:var(--txt3);margin:0 4px">·</span>');
 
   card.innerHTML = `
-    <div class="card-hd" onclick="toggleCard(this)">
+    <div class="card-hd">
       <div class="card-hd-top">
         <div class="card-hd-fields">
           <input class="field-address" value="${esc(p.address)}" placeholder="Property Address"
@@ -840,7 +870,7 @@ function buildCard(p) {
             <span class="field-label">Company</span>
             <input class="field-inline" value="${esc(p.company||'')}" placeholder="Company name"
               onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
-              oninput="fieldUpdate('${p.id}','company',this.value)" style="font-weight:600;min-width:200px;flex:1" />
+              oninput="fieldUpdate('${p.id}','company',this.value)" style="font-weight:600;min-width:120px;max-width:180px" />
             <span class="field-label" style="margin-left:6px">Emails</span>
             <input class="field-inline" value="${esc(p.emails||'')}" placeholder="email1@co.com, email2@co.com"
               onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
@@ -849,7 +879,6 @@ function buildCard(p) {
         </div>
         <div class="card-hd-actions">
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEdit('${p.id}')">Edit</button>
-          <div class="chevron">▾</div>
         </div>
       </div>
     </div>
@@ -858,6 +887,20 @@ function buildCard(p) {
       <span class="prog-label" style="color:${prColor}">${pr}% complete</span>
       ${emailPills ? `<span style="color:var(--txt3);margin:0 2px">|</span>${emailPills}` : ''}
     </div>
+    <button class="toggle-bar" onclick="toggleCard(this)">
+      <div class="toggle-bar-left">
+        <div class="toggle-steps-preview" id="steps-prev-${p.id}">
+          ${STEPS.slice(0,4).map(s => `<span class="mini-step${p.steps&&p.steps[s.id]?' mini-done':''}" data-cat="${s.cat}"></span>`).join('')}
+          <span style="font-size:11px;color:var(--txt3);font-family:var(--fm)">${stepsDone(p)} / ${STEPS.length} steps</span>
+        </div>
+      </div>
+      <div class="toggle-bar-right">
+        <span class="toggle-label">View Details</span>
+        <svg class="toggle-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </button>
     <div class="prog-bar"><div class="prog-fill" style="width:${pr}%"></div></div>
     <div class="steps-grid">${stepsHtml}</div>
     <div class="notes-row">
@@ -882,7 +925,7 @@ function buildAddBetween() {
 }
 
 // ── INTERACTIONS ─────────────────────────────────────────
-function toggleCard(hd) { hd.closest('.prop-card').classList.toggle('open'); }
+function toggleCard(el) { el.closest('.prop-card').classList.toggle('open'); }
 
 function toggleExpandAll() {
   allOpen = !allOpen;
