@@ -434,26 +434,6 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
     <button class="sb-btn active" id="co-all" onclick="setCompany('',this)">
       <span class="dot" style="background:var(--txt3)"></span> All Companies
     </button>
-    <button class="sb-btn" id="co-IVP" onclick="setCompany('IVP',this)">
-      <span class="dot" style="background:#1a7fa8"></span>
-      <span style="font-family:var(--fm);font-weight:700;letter-spacing:.04em">IVP</span>
-      <span id="cnt-IVP" style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--txt3)"></span>
-    </button>
-    <button class="sb-btn" id="co-JJF" onclick="setCompany('JJF',this)">
-      <span class="dot" style="background:#6d3fc7"></span>
-      <span style="font-family:var(--fm);font-weight:700;letter-spacing:.04em">JJF</span>
-      <span id="cnt-JJF" style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--txt3)"></span>
-    </button>
-    <button class="sb-btn" id="co-JEF" onclick="setCompany('JEF',this)">
-      <span class="dot" style="background:#0e9e65"></span>
-      <span style="font-family:var(--fm);font-weight:700;letter-spacing:.04em">JEF</span>
-      <span id="cnt-JEF" style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--txt3)"></span>
-    </button>
-    <button class="sb-btn" id="co-MPI" onclick="setCompany('MPI',this)">
-      <span class="dot" style="background:#b07a00"></span>
-      <span style="font-family:var(--fm);font-weight:700;letter-spacing:.04em">MPI</span>
-      <span id="cnt-MPI" style="margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--txt3)"></span>
-    </button>
     <div id="company-list"></div>
 
     <span class="sb-lbl" style="margin-top:14px">Progress</span>
@@ -741,11 +721,7 @@ function getFiltered() {
 
 function setCompany(co, btn) {
   filterCompany = co;
-  // Clear all company buttons (pinned + dynamic)
-  ['co-all','co-IVP','co-JJF','co-JEF','co-MPI'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove('active');
-  });
+  document.getElementById('co-all').classList.remove('active');
   document.querySelectorAll('#company-list .sb-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   render();
@@ -759,24 +735,19 @@ function setProgFilter(v, btn) {
 }
 
 function updateCompanyList() {
-  // Update pinned company counts
-  const PINNED = ['IVP','JJF','JEF','MPI'];
-  PINNED.forEach(co => {
-    const cnt = DB.filter(p => p.company === co).length;
-    const el = document.getElementById('cnt-'+co);
-    if (el) el.textContent = cnt > 0 ? cnt : '';
-    const btn = document.getElementById('co-'+co);
-    if (btn) btn.classList.toggle('active', filterCompany === co);
-  });
-  // Also show any other companies not in pinned list
-  const others = [...new Set(DB.map(p=>p.company).filter(Boolean))].sort()
-    .filter(co => !PINNED.includes(co));
+  // Deduplicated, sorted list of all companies across all properties
+  const companies = [...new Set(DB.map(p=>(p.company||'').trim()).filter(Boolean))].sort();
   const list = document.getElementById('company-list');
-  list.innerHTML = others.map(co => `
-    <button class="sb-btn${filterCompany===co?' active':''}" onclick="setCompany('${esc(co)}',this)">
-      <span class="dot" style="background:var(--info)"></span> ${esc(co)}
-    </button>
-  `).join('');
+  list.innerHTML = companies.map(co => {
+    const cnt = DB.filter(p=>(p.company||'').trim()===co).length;
+    return `
+      <button class="sb-btn${filterCompany===co?' active':''}" onclick="setCompany('${esc(co)}',this)">
+        <span class="dot" style="background:var(--info)"></span>
+        <span style="flex:1">${esc(co)}</span>
+        <span style="font-family:var(--fm);font-size:10px;color:var(--txt3);margin-left:auto">${cnt}</span>
+      </button>
+    `;
+  }).join('');
 }
 
 function updateStateFilter() {
