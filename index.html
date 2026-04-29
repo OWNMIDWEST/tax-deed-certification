@@ -669,7 +669,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
           <label class="flbl">Contact Emails</label>
           <div class="email-tag-wrap" id="email-tag-wrap" onclick="document.getElementById('email-tag-input').focus()">
             <div id="email-tags"></div>
-            <input type="email" id="email-tag-input" placeholder="Type email and press Enter or comma…" autocomplete="off"
+            <input type="email" id="email-tag-input" placeholder="Type email → press Enter or comma to add" autocomplete="off"
               onkeydown="emailKeydown(event)" oninput="emailInput(event)" />
           </div>
           <input type="hidden" id="fem" />
@@ -711,7 +711,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
           <label class="flbl">Contact Emails</label>
           <div class="email-tag-wrap" id="qt-email-tag-wrap" onclick="document.getElementById('qt-email-tag-input').focus()">
             <div id="qt-email-tags"></div>
-            <input type="email" id="qt-email-tag-input" placeholder="Type email and press Enter…" autocomplete="off"
+            <input type="email" id="qt-email-tag-input" placeholder="Type email → press Enter or comma to add" autocomplete="off"
               onkeydown="qtEmailKeydown(event)" oninput="qtEmailInput(event)" />
           </div>
           <input type="hidden" id="qt-fem" />
@@ -1199,6 +1199,7 @@ function closeForm() { document.getElementById('form-ov').classList.remove('open
 function ovClick(e) { if(e.target===document.getElementById('form-ov')) closeForm(); }
 
 async function saveProp() {
+  addEmailFromInput(); // capture any unsaved email in the tag input
   const addr = document.getElementById('fa').value.trim();
   if (!addr) { toast('Address is required','err'); return; }
   const eid = document.getElementById('feid').value;
@@ -1575,6 +1576,7 @@ const QT_STEPS = [
   {id:'master',     label:'Referred to Master',     cat:'court'},
   {id:'hearing',    label:'Hearing Date Set',       cat:'court'},
   {id:'final',      label:'Final Order',            cat:'done'},
+  {id:'pay_final',   label:'Pay Final Bill',          cat:'done'},
 ];
 const QT_CAT_LBL = {retainer:'Retainer', legal:'Legal Process', court:'Court', done:'Completion'};
 const QT_CAT_COLOR = {retainer:'var(--info)', legal:'var(--pur)', court:'var(--acc)', done:'var(--teal)'};
@@ -2053,6 +2055,7 @@ function qtCloseForm() { document.getElementById('qt-form-ov').classList.remove(
 function qtOvClick(e) { if (e.target===document.getElementById('qt-form-ov')) qtCloseForm(); }
 
 async function qtSaveProp() {
+  qtAddEmailFromInput(); // capture any unsaved email in the tag input
   const addr = document.getElementById('qt-fa').value.trim();
   if (!addr) { toast('Address is required','err'); return; }
   const eid = document.getElementById('qt-feid').value;
