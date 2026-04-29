@@ -813,7 +813,8 @@ function startPolling() {
         const local = DB.find(p => p.id === r.id);
         if (!local || new Date(r.updated_at) > new Date(local.updated_at || 0)) {
           const idx = DB.findIndex(p => p.id === r.id);
-          if (idx === -1) DB.unshift(r); else DB[idx] = r;
+          const sr = sanitizeProp(r);
+          if (idx === -1) DB.unshift(sr); else DB[idx] = sr;
           changed = true;
         }
       });
@@ -843,7 +844,7 @@ async function init() {
   try {
     setSyncStatus('saving');
     const remote = await sbGet();
-    DB = remote;
+    DB = remote.map(sanitizeProp);
     saveLocal();
     setSyncStatus('ok');
     render();
@@ -977,8 +978,33 @@ function render() {
   }
   empty.style.display = 'none';
   items.forEach((p, i) => {
-    wrap.appendChild(buildCard(p));
+    try {
+      wrap.appendChild(buildCard(sanitizeProp(p)));
+    } catch(err) {
+      console.error('buildCard error for', p.id, err);
+    }
   });
+}
+
+// Guarantee all fields exist so buildCard never crashes on null/undefined
+function sanitizeProp(p) {
+  return {
+    id:           p.id           || '',
+    address:      p.address      || '',
+    company:      p.company      || '',
+    emails:       p.emails       || '',
+    parcel:       p.parcel       || '',
+    county:       p.county       || '',
+    state:        p.state        || '',
+    cert:         p.cert         || '',
+    date_started: p.date_started || '',
+    notes:        p.notes        || '',
+    foia_url:     p.foia_url     || '',
+    foia_name:    p.foia_name    || '',
+    extra_docs:   Array.isArray(p.extra_docs) ? p.extra_docs : [],
+    steps:        (p.steps && typeof p.steps === 'object') ? p.steps : {},
+    updated_at:   p.updated_at   || '',
+  };
 }
 
 function buildCard(p) {
@@ -1694,7 +1720,31 @@ function qtRender() {
     return;
   }
   empty.style.display = 'none';
-  items.forEach(p => wrap.appendChild(qtBuildCard(p)));
+  items.forEach(p => {
+    try { wrap.appendChild(qtBuildCard(qtSanitizeProp(p))); }
+    catch(err) { console.error('qtBuildCard error', p.id, err); }
+  });
+}
+
+function qtSanitizeProp(p) {
+  return {
+    id:           p.id           || '',
+    address:      p.address      || '',
+    company:      p.company      || '',
+    law_firm:     p.law_firm     || '',
+    case_num:     p.case_num     || '',
+    emails:       p.emails       || '',
+    parcel:       p.parcel       || '',
+    county:       p.county       || '',
+    state:        p.state        || '',
+    date_started: p.date_started || '',
+    notes:        p.notes        || '',
+    foia_url:     p.foia_url     || '',
+    foia_name:    p.foia_name    || '',
+    extra_docs:   Array.isArray(p.extra_docs) ? p.extra_docs : [],
+    steps:        (p.steps && typeof p.steps === 'object') ? p.steps : {},
+    updated_at:   p.updated_at   || '',
+  };
 }
 
 // ── QT BUILD CARD ────────────────────────────────────────────
