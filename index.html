@@ -315,7 +315,28 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
   .st{min-width:50%;border-bottom:1px solid var(--bdr)}
   .fgrid{grid-template-columns:1fr}
   .hd-row{flex-direction:column;align-items:flex-start}
+  .mobile-nav{display:flex !important}
+  .main{padding-bottom:64px}
 }
+
+/* MOBILE BOTTOM NAV */
+.mobile-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--surf);border-top:1px solid var(--bdr2);
+  z-index:50;height:60px;
+  box-shadow:0 -4px 16px rgba(0,0,0,0.08)
+}
+.mob-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;border:none;background:none;
+  cursor:pointer;padding:8px 4px;transition:all .14s;
+  font-family:var(--fb);color:var(--txt3)
+}
+.mob-btn.active{color:var(--acc)}
+.mob-btn-icon{font-size:18px;line-height:1}
+.mob-btn-label{font-size:10px;font-weight:600;letter-spacing:.04em}
+.mob-divider{width:1px;background:var(--bdr);align-self:stretch;margin:10px 0}
 
 /* EMAIL TAGS */
 .email-tag-wrap{
@@ -692,6 +713,24 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 </div>
 
 <div class="toast-wrap" id="toasts"></div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav" id="mobile-nav">
+  <button class="mob-btn active" id="mob-p1" onclick="showPage(1);mobActive(1)">
+    <span class="mob-btn-icon">📋</span>
+    <span class="mob-btn-label">TD Certs</span>
+  </button>
+  <div class="mob-divider"></div>
+  <button class="mob-btn" id="mob-p2" onclick="showPage(2);mobActive(2)">
+    <span class="mob-btn-icon">⚖️</span>
+    <span class="mob-btn-label">Quiet Titles</span>
+  </button>
+  <div class="mob-divider"></div>
+  <button class="mob-btn" id="mob-add" onclick="currentPage===1?openAdd():qtOpenAdd()">
+    <span class="mob-btn-icon" style="font-size:22px;color:var(--acc)">＋</span>
+    <span class="mob-btn-label" style="color:var(--acc)">Add</span>
+  </button>
+</nav>
 
 <!-- QT ADD/EDIT MODAL -->
 <div class="overlay" id="qt-form-ov" onclick="qtOvClick(event)">
@@ -2093,6 +2132,14 @@ async function qtDelProp() {
   qtCloseForm(); qtRender();
   try { await qtDelete(eid); toast('Property deleted','ok'); }
   catch(e) { toast('Deleted locally — sync failed','err'); }
+}
+
+
+// ── MOBILE NAV ───────────────────────────────────────────────
+function mobActive(n) {
+  document.querySelectorAll('.mob-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('mob-p'+n);
+  if (btn) btn.classList.add('active');
 }
 
 </script>
