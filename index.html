@@ -482,6 +482,27 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 .visit-time{font-family:var(--fm);font-size:10px;color:var(--txt3);white-space:nowrap;flex-shrink:0}
 .visit-info{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--fm);font-size:10px}
 .visits-loading{text-align:center;padding:20px;color:var(--txt3);font-size:12px}
+
+/* QT step color overrides — retainer maps to info, legal to pur, court to acc */
+.step.done[data-cat=retainer]{background:var(--info-dim);border-color:rgba(26,127,168,.28)}
+.step.done[data-cat=retainer] .step-lbl{color:var(--info)}
+.step.done[data-cat=retainer] .step-num{background:var(--info);color:#001824;border-color:transparent}
+.step.done[data-cat=retainer] .step-chk{opacity:1;color:var(--info)}
+
+.step.done[data-cat=legal]{background:var(--pur-dim);border-color:rgba(109,63,199,.28)}
+.step.done[data-cat=legal] .step-lbl{color:var(--pur)}
+.step.done[data-cat=legal] .step-num{background:var(--pur);color:#0e0020;border-color:transparent}
+.step.done[data-cat=legal] .step-chk{opacity:1;color:var(--pur)}
+
+.step.done[data-cat=court]{background:var(--acc-dim);border-color:rgba(58,125,30,.28)}
+.step.done[data-cat=court] .step-lbl{color:var(--acc)}
+.step.done[data-cat=court] .step-num{background:var(--acc);color:var(--acc-dk);border-color:transparent}
+.step.done[data-cat=court] .step-chk{opacity:1;color:var(--acc)}
+
+/* QT mini step dots in toggle bar */
+.mini-step.mini-done[data-cat=retainer]{background:var(--info);border-color:var(--info)}
+.mini-step.mini-done[data-cat=legal]{background:var(--pur);border-color:var(--pur)}
+.mini-step.mini-done[data-cat=court]{background:var(--acc);border-color:var(--acc)}
 </style>
 </head>
 <body>
@@ -503,31 +524,51 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
       <span class="page-icon">⚖️</span> Quiet Titles
     </button>
 
-    <span class="sb-lbl" style="margin-top:14px">Quick Jump</span>
-    <button class="sb-btn active" id="co-all" onclick="setCompany('',this)">
-      <span class="dot" style="background:var(--txt3)"></span> All Companies
-    </button>
-    <div id="company-list"></div>
+    <!-- TD sidebar context -->
+    <div id="sb-ctx-1">
+      <span class="sb-lbl" style="margin-top:14px">Quick Jump</span>
+      <button class="sb-btn active" id="co-all" onclick="setCompany('',this)">
+        <span class="dot" style="background:var(--txt3)"></span> All Companies
+      </button>
+      <div id="company-list"></div>
+      <span class="sb-lbl" style="margin-top:14px">Progress</span>
+      <button class="sb-btn" onclick="setProgFilter('',this)"><span class="dot" style="background:var(--txt3)"></span> All</button>
+      <button class="sb-btn" onclick="setProgFilter('partial',this)"><span class="dot" style="background:var(--acc)"></span> In Progress</button>
+      <button class="sb-btn" onclick="setProgFilter('100',this)"><span class="dot" style="background:var(--teal)"></span> Fully Closed</button>
+      <span class="sb-lbl" style="margin-top:14px">Step Colors</span>
+      <div style="padding:0 6px;display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--info);flex-shrink:0"></div>Certification</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--pur);flex-shrink:0"></div>Title Work</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--acc);flex-shrink:0"></div>Closing</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0"></div>Complete</div>
+      </div>
+    </div>
 
-    <span class="sb-lbl" style="margin-top:14px">Progress</span>
-    <button class="sb-btn" onclick="setProgFilter('',this)"><span class="dot" style="background:var(--txt3)"></span> All</button>
-    <button class="sb-btn" onclick="setProgFilter('partial',this)"><span class="dot" style="background:var(--acc)"></span> In Progress</button>
-    <button class="sb-btn" onclick="setProgFilter('100',this)"><span class="dot" style="background:var(--teal)"></span> Fully Closed</button>
-
-    <span class="sb-lbl" style="margin-top:14px">Step Colors</span>
-    <div style="padding:0 6px;display:flex;flex-direction:column;gap:4px">
-      <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--info);flex-shrink:0"></div>Certification</div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--pur);flex-shrink:0"></div>Title Work</div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--acc);flex-shrink:0"></div>Closing</div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0"></div>Complete</div>
+    <!-- QT sidebar context -->
+    <div id="sb-ctx-2" style="display:none">
+      <span class="sb-lbl" style="margin-top:14px">Quick Jump</span>
+      <button class="sb-btn active" id="qt-co-all" onclick="qtSetCompany('',this)">
+        <span class="dot" style="background:var(--txt3)"></span> All Companies
+      </button>
+      <div id="qt-company-list"></div>
+      <span class="sb-lbl" style="margin-top:14px">Progress</span>
+      <button class="sb-btn" onclick="qtSetProgFilter('',this)"><span class="dot" style="background:var(--txt3)"></span> All</button>
+      <button class="sb-btn" onclick="qtSetProgFilter('partial',this)"><span class="dot" style="background:var(--acc)"></span> In Progress</button>
+      <button class="sb-btn" onclick="qtSetProgFilter('100',this)"><span class="dot" style="background:var(--teal)"></span> Fully Closed</button>
+      <span class="sb-lbl" style="margin-top:14px">Step Colors</span>
+      <div style="padding:0 6px;display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--info);flex-shrink:0"></div>Retainer</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--pur);flex-shrink:0"></div>Legal Process</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--acc);flex-shrink:0"></div>Court</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)"><div style="width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0"></div>Complete</div>
+      </div>
     </div>
   </nav>
 
   <div id="sync-badge" class="sync-badge ok"><div class="sync-dot"></div><span id="sync-txt">Synced</span></div>
 
   <div class="sb-stats">
-    <div class="sb-stat">Properties <span id="sb-count">0</span></div>
-    <div class="sb-stat">Invested <span id="sb-inv">$0</span></div>
+    <div class="sb-stat" id="sb-stat-label">TD Properties <span id="sb-count">0</span></div>
     <div class="sb-stat">Closed <span id="sb-closed">0</span></div>
   </div>
   <button class="visits-btn" onclick="openVisits()">
@@ -581,19 +622,32 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
   <div id="page2" style="display:none;flex:1;flex-direction:column">
     <div class="topbar">
       <div class="topbar-l">
-        <div class="topbar-title">Quiet Title Process</div>
-        <div class="topbar-sub">Coming soon — structure is ready in Supabase</div>
+        <div class="topbar-title">Quiet Titles</div>
+        <div class="topbar-sub">All edits auto-save and sync to teammates in real time</div>
+      </div>
+      <div class="topbar-r">
+        <button class="btn btn-ghost btn-sm" onclick="qtToggleExpandAll()" id="qt-exp-btn">Expand All</button>
+        <button class="btn btn-ghost btn-sm" onclick="qtExportJSON()">⬇ Export JSON</button>
+        <button class="btn btn-primary" onclick="qtOpenAdd()">+ Add Property</button>
       </div>
     </div>
-    <div class="page2-wrap">
-      <div class="page2-badge">⚖️ Under Construction</div>
-      <div class="page2-title">Quiet Title</div>
-      <div class="page2-sub">
-        This page will track the Quiet Title process for each property.
-        The database table is already created and ready in Supabase.
-        Provide your process steps and fields and this page will be built out.
+    <div class="stats-bar">
+      <div class="st"><div class="st-lbl">Properties</div><div class="st-val g" id="qt-st-total">0</div></div>
+      <div class="st"><div class="st-lbl">Avg Progress</div><div class="st-val t" id="qt-st-prog">0%</div></div>
+      <div class="st"><div class="st-lbl">Final Order</div><div class="st-val g" id="qt-st-closed">0</div></div>
+    </div>
+    <div class="toolbar">
+      <div class="sw">
+        <span class="si">⌕</span>
+        <input type="text" id="qt-search" placeholder="Search address, company, case #…" oninput="qtRender()"/>
       </div>
-      <button class="btn btn-ghost" onclick="showPage(1)">← Back to Tax Deed</button>
+      <select class="fsel" id="qt-fstate" onchange="qtRender()"><option value="">All States</option></select>
+    </div>
+    <div class="props-wrap" id="qt-props-wrap">
+      <div class="empty-st" id="qt-empty-st">
+        <div class="ei">🔄</div>
+        <p>Loading…</p>
+      </div>
     </div>
   </div>
 
@@ -638,6 +692,44 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 </div>
 
 <div class="toast-wrap" id="toasts"></div>
+
+<!-- QT ADD/EDIT MODAL -->
+<div class="overlay" id="qt-form-ov" onclick="qtOvClick(event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-ttl" id="qt-form-ttl">Add Quiet Title Property</div>
+      <button class="modal-x" onclick="qtCloseForm()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="fgrid">
+        <div class="fg full"><label class="flbl">Property Address *</label><input class="fi" id="qt-fa" placeholder="123 Main St, Miami, FL 33101"/></div>
+        <div class="fg full"><label class="flbl">Company Name</label><input class="fi" id="qt-fco" placeholder="ABC Holdings LLC"/></div>
+        <div class="fg full"><label class="flbl">Law Firm Assigned</label><input class="fi" id="qt-flf" placeholder="Smith & Associates Law Firm"/></div>
+        <div class="fg"><label class="flbl">Case Number</label><input class="fi" id="qt-fcn" placeholder="2024-CA-001234"/></div>
+        <div class="fg"><label class="flbl">Date Started</label><input class="fi" id="qt-fds" type="date"/></div>
+        <div class="fg full">
+          <label class="flbl">Contact Emails</label>
+          <div class="email-tag-wrap" id="qt-email-tag-wrap" onclick="document.getElementById('qt-email-tag-input').focus()">
+            <div id="qt-email-tags"></div>
+            <input type="email" id="qt-email-tag-input" placeholder="Type email and press Enter…" autocomplete="off"
+              onkeydown="qtEmailKeydown(event)" oninput="qtEmailInput(event)" />
+          </div>
+          <input type="hidden" id="qt-fem" />
+        </div>
+        <div class="fg"><label class="flbl">Parcel ID / APN</label><input class="fi" id="qt-fp" placeholder="00-0000-000-0000"/></div>
+        <div class="fg"><label class="flbl">County</label><input class="fi" id="qt-fc" placeholder="Miami-Dade"/></div>
+        <div class="fg"><label class="flbl">State</label><input class="fi" id="qt-fst" placeholder="FL" maxlength="2"/></div>
+        <div class="fg full"><label class="flbl">Notes</label><textarea class="fta" id="qt-fno" placeholder="Case notes, attorney info, strategy…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <input type="hidden" id="qt-feid"/>
+      <button class="btn btn-danger btn-sm" id="qt-del-btn" onclick="qtDelProp()" style="margin-right:auto;display:none">Delete</button>
+      <button class="btn btn-ghost" onclick="qtCloseForm()">Cancel</button>
+      <button class="btn btn-primary" onclick="qtSaveProp()">Save</button>
+    </div>
+  </div>
+</div>
 
 <!-- VISITS PANEL -->
 <div class="visits-overlay" id="visits-ov" onclick="visitsOvClick(event)">
@@ -1137,6 +1229,11 @@ function showPage(n) {
   document.getElementById('page2').style.display = n===2 ? 'flex' : 'none';
   document.getElementById('nav-p1').classList.toggle('active', n===1);
   document.getElementById('nav-p2').classList.toggle('active', n===2);
+  document.getElementById('sb-ctx-1').style.display = n===1 ? 'block' : 'none';
+  document.getElementById('sb-ctx-2').style.display = n===2 ? 'block' : 'none';
+  const lbl = document.getElementById('sb-stat-label');
+  if (lbl) { lbl.innerHTML = (n===1?'TD Properties ':'QT Properties ')+'<span id="sb-count">'+(n===1?DB.length:qtDB.length)+'</span>'; }
+  if (n===2) qtRender();
 }
 
 // ── TOAST ────────────────────────────────────────────────
@@ -1433,6 +1530,517 @@ async function openVisits() {
 
 function closeVisits() { document.getElementById('visits-ov').classList.remove('open'); }
 function visitsOvClick(e) { if (e.target === document.getElementById('visits-ov')) closeVisits(); }
+
+
+// ═══════════════════════════════════════════════════════════════
+//  QUIET TITLE ENGINE
+// ═══════════════════════════════════════════════════════════════
+const QT_TABLE = 'qt_properties';
+const QT_STEPS = [
+  {id:'sign_ret',   label:'Sign Retainer',         cat:'retainer'},
+  {id:'pay_ret',    label:'Pay Retainer',           cat:'retainer'},
+  {id:'title_prog', label:'Title Work in Progress', cat:'legal'},
+  {id:'research',   label:'Research',               cat:'legal'},
+  {id:'lis_pen',    label:'Lis Pendens Filed',      cat:'legal'},
+  {id:'summons',    label:'Summons Made',           cat:'legal'},
+  {id:'guardian',   label:'Apt Guardian',           cat:'legal'},
+  {id:'pub',        label:'Publication',            cat:'legal'},
+  {id:'affidavits', label:'Affidavits Filed',       cat:'court'},
+  {id:'master',     label:'Referred to Master',     cat:'court'},
+  {id:'hearing',    label:'Hearing Date Set',       cat:'court'},
+  {id:'final',      label:'Final Order',            cat:'done'},
+];
+const QT_CAT_LBL = {retainer:'Retainer', legal:'Legal Process', court:'Court', done:'Completion'};
+const QT_CAT_COLOR = {retainer:'var(--info)', legal:'var(--pur)', court:'var(--acc)', done:'var(--teal)'};
+
+let qtDB = [];
+let qtFilterCompany = '';
+let qtFilterProg    = '';
+let qtAllOpen       = false;
+let qtSaveTimers    = {};
+
+// ── QT SUPABASE ───────────────────────────────────────────────
+async function qtGet() {
+  const r = await fetch(`${SB_URL}/rest/v1/${QT_TABLE}?order=updated_at.desc&select=*`, {headers:HEADERS});
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function qtUpsert(row) {
+  row.updated_at = new Date().toISOString();
+  const r = await fetch(`${SB_URL}/rest/v1/${QT_TABLE}`, {
+    method:'POST',
+    headers:{...HEADERS,'Prefer':'resolution=merge-duplicates,return=representation'},
+    body: JSON.stringify(row)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function qtDelete(id) {
+  const r = await fetch(`${SB_URL}/rest/v1/${QT_TABLE}?id=eq.${id}`, {method:'DELETE', headers:HEADERS});
+  if (!r.ok) throw new Error(await r.text());
+}
+
+// ── QT INIT (called once on first page 2 visit) ───────────────
+let qtInited = false;
+async function qtInit() {
+  if (qtInited) return;
+  qtInited = true;
+  try {
+    const remote = await qtGet();
+    qtDB = remote;
+    qtRender();
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('err');
+    toast('QT: could not reach Supabase','err');
+    document.getElementById('qt-empty-st').querySelector('p').textContent = 'No properties yet.';
+  }
+}
+
+// ── QT UTILS ─────────────────────────────────────────────────
+function qtProgress(p) {
+  if (!p.steps) return 0;
+  return Math.round(QT_STEPS.filter(s=>p.steps[s.id]).length / QT_STEPS.length * 100);
+}
+function qtStepsDone(p) { return p.steps ? QT_STEPS.filter(s=>p.steps[s.id]).length : 0; }
+
+// ── QT SCHED SAVE ────────────────────────────────────────────
+function qtSchedSave(id) {
+  if (qtSaveTimers[id]) clearTimeout(qtSaveTimers[id]);
+  qtSaveTimers[id] = setTimeout(() => qtPersist(id), 900);
+}
+async function qtPersist(id) {
+  const p = qtDB.find(x=>x.id===id);
+  if (!p) return;
+  setSyncStatus('saving');
+  try { await qtUpsert({...p}); setSyncStatus('ok'); }
+  catch(e) { setSyncStatus('err'); toast('QT save failed','err'); }
+}
+
+// ── QT FILTERS ────────────────────────────────────────────────
+function qtGetFiltered() {
+  const q = (document.getElementById('qt-search')?.value||'').toLowerCase();
+  const fst = document.getElementById('qt-fstate')?.value||'';
+  return qtDB.filter(p => {
+    if (qtFilterCompany && p.company !== qtFilterCompany) return false;
+    if (fst && p.state !== fst) return false;
+    const pr = qtProgress(p);
+    if (qtFilterProg==='partial' && (pr===0||pr===100)) return false;
+    if (qtFilterProg==='100' && pr!==100) return false;
+    if (q) {
+      const hay = [p.address,p.company,p.law_firm,p.case_num,p.emails,p.county,p.state,p.parcel,p.notes].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function qtSetCompany(co, btn) {
+  qtFilterCompany = co;
+  document.getElementById('qt-co-all').classList.remove('active');
+  document.querySelectorAll('#qt-company-list .sb-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  qtRender();
+}
+function qtSetProgFilter(v, btn) {
+  qtFilterProg = v;
+  qtRender();
+}
+
+function qtUpdateCompanyList() {
+  const companies = [...new Set(qtDB.map(p=>(p.company||'').trim()).filter(Boolean))].sort();
+  const list = document.getElementById('qt-company-list');
+  if (!list) return;
+  list.innerHTML = companies.map(co => {
+    const cnt = qtDB.filter(p=>(p.company||'').trim()===co).length;
+    return `<button class="sb-btn${qtFilterCompany===co?' active':''}" onclick="qtSetCompany('${esc(co)}',this)">
+      <span class="dot" style="background:var(--info)"></span>
+      <span style="flex:1">${esc(co)}</span>
+      <span style="font-family:var(--fm);font-size:10px;color:var(--txt3);margin-left:auto">${cnt}</span>
+    </button>`;
+  }).join('');
+}
+
+function qtUpdateStateFilter() {
+  const sel = document.getElementById('qt-fstate');
+  if (!sel) return;
+  const cur = sel.value;
+  const states = [...new Set(qtDB.map(p=>p.state).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">All States</option>'+states.map(s=>`<option${s===cur?' selected':''}>${s}</option>`).join('');
+}
+
+// ── QT STATS ─────────────────────────────────────────────────
+function qtUpdateStats() {
+  const all = qtDB;
+  document.getElementById('qt-st-total').textContent = all.length;
+  const progs = all.map(p=>qtProgress(p));
+  document.getElementById('qt-st-prog').textContent = progs.length ? Math.round(progs.reduce((a,b)=>a+b,0)/progs.length)+'%':'0%';
+  document.getElementById('qt-st-closed').textContent = all.filter(p=>p.steps?.final).length;
+}
+
+// ── QT RENDER ────────────────────────────────────────────────
+function qtRender() {
+  qtInit();
+  qtUpdateStats();
+  qtUpdateCompanyList();
+  qtUpdateStateFilter();
+  const items = qtGetFiltered();
+  const wrap = document.getElementById('qt-props-wrap');
+  wrap.querySelectorAll('.prop-card').forEach(el=>el.remove());
+  const empty = document.getElementById('qt-empty-st');
+  if (!items.length) {
+    empty.style.display = 'block';
+    empty.querySelector('p').textContent = qtDB.length ? 'No properties match your filters.' : 'No properties yet. Add your first!';
+    return;
+  }
+  empty.style.display = 'none';
+  items.forEach(p => wrap.appendChild(qtBuildCard(p)));
+}
+
+// ── QT BUILD CARD ────────────────────────────────────────────
+function qtBuildCard(p) {
+  const pr = qtProgress(p);
+  const card = document.createElement('div');
+  card.className = 'prop-card' + (qtAllOpen ? ' open' : '');
+  card.dataset.id = p.id;
+
+  let stepsHtml = '';
+  let lastCat = null;
+  QT_STEPS.forEach((s,i) => {
+    if (s.cat !== lastCat) { stepsHtml += `<div class="cat-div">${QT_CAT_LBL[s.cat]}</div>`; lastCat = s.cat; }
+    const done = !!(p.steps && p.steps[s.id]);
+    stepsHtml += `<div class="step${done?' done':''}" data-cat="${s.cat}" onclick="qtToggleStep('${p.id}','${s.id}',this)">
+      <div class="step-num">${i+1}</div>
+      <div class="step-lbl">${s.label}</div>
+      <div class="step-chk">✓</div>
+    </div>`;
+  });
+
+  // QT-specific step colors (cat names differ so we need inline overrides)
+  // retainer=info, legal=pur, court=acc, done=teal — matches CSS via data-cat mapping below
+
+  const prColor = pr===100?'var(--teal)':pr>0?'var(--acc)':'var(--txt3)';
+
+  const emailList2 = (p.emails||'').split(',').map(e=>e.trim()).filter(Boolean);
+  const emailPills2 = emailList2.map(e=>`<a href="mailto:${esc(e)}" style="color:var(--info);font-size:12px;font-family:var(--fm);text-decoration:none" onclick="event.stopPropagation()">${esc(e)}</a>`).join('<span style="color:var(--txt3);margin:0 4px">·</span>');
+
+  const chips = [
+    p.parcel  ? `<span class="chip">${esc(p.parcel)}</span>` : '',
+    (p.county||p.state) ? `<span class="chip">${esc([p.county,p.state].filter(Boolean).join(', '))}</span>` : '',
+    p.case_num ? `<span class="chip">Case: ${esc(p.case_num)}</span>` : '',
+    p.date_started ? `<span class="chip">Started: ${fmtDate(p.date_started)}<span style="color:#c97a00;font-weight:600;margin-left:6px">${daysElapsed(p.date_started)}d</span></span>` : '',
+    p.foia_url ? `<span class="foia-badge"><span class="foia-badge-dot"></span>FOIA Uploaded</span>` : '',
+  ].join('');
+
+  card.innerHTML = `
+    <div class="card-hd">
+      <div class="card-hd-top">
+        <div class="card-hd-fields">
+          <input class="field-address" value="${esc(p.address)}" placeholder="Property Address"
+            onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
+            oninput="qtFieldUpdate('${p.id}','address',this.value)" />
+          <div class="hd-row">
+            <span class="field-label">Company</span>
+            <input class="field-inline" value="${esc(p.company||'')}" placeholder="Company name"
+              onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
+              oninput="qtFieldUpdate('${p.id}','company',this.value)" style="font-weight:600;min-width:120px;max-width:180px"/>
+            <span class="field-label" style="margin-left:6px">Law Firm</span>
+            <input class="field-inline" value="${esc(p.law_firm||'')}" placeholder="Smith & Associates"
+              onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
+              oninput="qtFieldUpdate('${p.id}','law_firm',this.value)" style="min-width:160px;max-width:240px"/>
+            <span class="field-label" style="margin-left:6px">Case #</span>
+            <input class="field-inline" value="${esc(p.case_num||'')}" placeholder="2024-CA-001234"
+              onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
+              oninput="qtFieldUpdate('${p.id}','case_num',this.value)" style="min-width:120px;max-width:180px"/>
+            <span class="field-label" style="margin-left:6px">Emails</span>
+            <input class="field-inline" value="${esc(p.emails||'')}" placeholder="email@firm.com"
+              onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
+              oninput="qtFieldUpdate('${p.id}','emails',this.value)" style="min-width:180px"/>
+          </div>
+        </div>
+        <div class="card-hd-actions">
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();qtOpenEdit('${p.id}')">Edit</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      ${chips}
+      <span class="prog-label" style="color:${prColor}">${pr}% complete</span>
+      ${emailPills2 ? `<span style="color:var(--txt3);margin:0 2px">|</span>${emailPills2}` : ''}
+    </div>
+    <button class="toggle-bar" onclick="toggleCard(this)">
+      <div class="toggle-bar-left">
+        <div class="toggle-steps-preview">
+          ${QT_STEPS.slice(0,4).map(s=>`<span class="mini-step${p.steps&&p.steps[s.id]?' mini-done':''}" data-cat="${s.cat}"></span>`).join('')}
+          <span style="font-size:11px;color:var(--txt3);font-family:var(--fm)">${qtStepsDone(p)} / ${QT_STEPS.length} steps</span>
+        </div>
+      </div>
+      <div class="toggle-bar-right">
+        <span class="toggle-label">View Details</span>
+        <svg class="toggle-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </button>
+    <div class="prog-bar"><div class="prog-fill" style="width:${pr}%"></div></div>
+    <div class="steps-grid">${stepsHtml}</div>
+    <div class="notes-row">
+      <div class="notes-lbl">Notes</div>
+      <div class="notes-display${p.notes?'':' empty'}" onclick="qtEditNotes('${p.id}',this)">${p.notes?esc(p.notes):'Click to add notes…'}</div>
+    </div>
+    <div class="foia-row">
+      <div class="foia-lbl">Documents</div>
+      <div class="docs-cols">
+        <div class="docs-col">
+          <div class="docs-col-lbl">FOIA Document</div>
+          <div id="foia-area-qt-${p.id}">${qtBuildFoiaHtml(p)}</div>
+        </div>
+        <div class="docs-col">
+          <div class="docs-col-lbl">Additional Files</div>
+          <div id="extra-area-qt-${p.id}">${qtBuildExtraDocsHtml(p)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+// ── QT STEP COLORS: retainer=info, legal=pur, court=acc, done=teal ───────────
+// These reuse existing .step.done[data-cat=...] CSS — we just need the cat names
+// to map: retainer→cert color (info), legal→title color (pur), court→closing (acc), done→done (teal)
+// We'll add a small CSS override:
+
+// ── QT INTERACTIONS ──────────────────────────────────────────
+function qtFieldUpdate(id, field, value) {
+  const p = qtDB.find(x=>x.id===id);
+  if (!p) return;
+  p[field] = value;
+  qtSchedSave(id);
+  if (field==='company') qtUpdateCompanyList();
+}
+
+function qtToggleStep(propId, stepId, el) {
+  const p = qtDB.find(x=>x.id===propId);
+  if (!p) return;
+  if (!p.steps) p.steps = {};
+  p.steps[stepId] = !p.steps[stepId];
+  el.classList.toggle('done', p.steps[stepId]);
+  const card = el.closest('.prop-card');
+  const pr = qtProgress(p);
+  card.querySelector('.prog-fill').style.width = pr+'%';
+  const prColor = pr===100?'var(--teal)':pr>0?'var(--acc)':'var(--txt3)';
+  const lbl = card.querySelector('.prog-label');
+  if (lbl) { lbl.style.color=prColor; lbl.textContent=pr+'% complete'; }
+  qtUpdateStats();
+  qtSchedSave(propId);
+  toast(p.steps[stepId]?'✓ Step complete':'Step unchecked','ok');
+}
+
+function qtEditNotes(propId, el) {
+  const p = qtDB.find(x=>x.id===propId);
+  if (!p) return;
+  const ta = document.createElement('textarea');
+  ta.className = 'notes-input';
+  ta.value = p.notes||'';
+  ta.placeholder = 'Add notes…';
+  el.replaceWith(ta);
+  ta.focus();
+  ta.addEventListener('blur', () => {
+    p.notes = ta.value.trim();
+    qtSchedSave(propId);
+    const nd = document.createElement('div');
+    nd.className = 'notes-display'+(p.notes?'':' empty');
+    nd.textContent = p.notes||'Click to add notes…';
+    nd.onclick = () => qtEditNotes(propId, nd);
+    ta.replaceWith(nd);
+  });
+}
+
+function qtToggleExpandAll() {
+  qtAllOpen = !qtAllOpen;
+  document.querySelectorAll('#qt-props-wrap .prop-card').forEach(c=>c.classList.toggle('open',qtAllOpen));
+  document.getElementById('qt-exp-btn').textContent = qtAllOpen ? 'Collapse All' : 'Expand All';
+}
+
+function qtExportJSON() {
+  const blob = new Blob([JSON.stringify(qtDB, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `quiet-title-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('QT JSON backup downloaded','info');
+}
+
+// ── QT FOIA / DOCS ───────────────────────────────────────────
+function qtBuildFoiaHtml(p) {
+  if (p.foia_url) {
+    const name = p.foia_name || 'FOIA Document';
+    return `<div class="extra-doc-item">
+      <a href="${esc(p.foia_url)}" target="_blank" rel="noopener" title="${esc(name)}">📄 ${esc(name)}</a>
+      <button class="extra-doc-del" onclick="qtDeleteFoia('${p.id}')" title="Remove">×</button>
+    </div>`;
+  }
+  return `<label class="foia-file-btn">📎 Attach FOIA PDF
+    <input type="file" accept="application/pdf,.pdf,.doc,.docx" onchange="qtUploadFoia('${p.id}', this)" />
+  </label>`;
+}
+function qtBuildExtraDocsHtml(p) {
+  const docs = p.extra_docs || [];
+  const items = docs.map((d,i)=>`<div class="extra-doc-item">
+    <a href="${esc(d.url)}" target="_blank" rel="noopener" title="${esc(d.name)}">📎 ${esc(d.name)}</a>
+    <button class="extra-doc-del" onclick="qtDeleteExtraDoc('${p.id}',${i})" title="Remove">×</button>
+  </div>`).join('');
+  return items+`<label class="foia-file-btn" style="margin-top:${docs.length?'6px':'0'}">+ Add File
+    <input type="file" accept="application/pdf,.pdf,.doc,.docx,.png,.jpg,.jpeg" onchange="qtUploadExtraDoc('${p.id}', this)" />
+  </label>`;
+}
+
+async function qtUploadFile(propId, file, prefix) {
+  const fileName = propId+'_'+prefix+'_'+Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+  const res = await fetch(`${SB_URL}/storage/v1/object/foia-docs/${fileName}`, {
+    method:'POST', headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type||'application/octet-stream'},
+    body: file
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return `${SB_URL}/storage/v1/object/public/foia-docs/${fileName}`;
+}
+async function qtFileToBase64(file) {
+  return new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file); });
+}
+
+async function qtUploadFoia(propId, input) {
+  const file = input.files[0]; if (!file) return;
+  const area = document.getElementById('foia-area-qt-'+propId);
+  if (area) area.innerHTML='<span class="foia-uploading">⏳ Uploading…</span>';
+  let url;
+  try { url = await qtUploadFile(propId, file, 'foia'); }
+  catch(e) { url = await qtFileToBase64(file); }
+  const p = qtDB.find(x=>x.id===propId);
+  if (p) { p.foia_url=url; p.foia_name=file.name; qtSchedSave(propId); if(area) area.innerHTML=qtBuildFoiaHtml(p); toast('FOIA uploaded','ok'); }
+}
+async function qtDeleteFoia(propId) {
+  if (!confirm('Remove FOIA document?')) return;
+  const p = qtDB.find(x=>x.id===propId);
+  if (!p) return;
+  p.foia_url=''; p.foia_name=''; qtSchedSave(propId);
+  const area = document.getElementById('foia-area-qt-'+propId);
+  if (area) area.innerHTML=qtBuildFoiaHtml(p);
+  toast('FOIA removed','ok');
+}
+async function qtUploadExtraDoc(propId, input) {
+  const file = input.files[0]; if (!file) return;
+  const area = document.getElementById('extra-area-qt-'+propId);
+  if (area) area.innerHTML='<span class="foia-uploading">⏳ Uploading…</span>';
+  let url;
+  try { url = await qtUploadFile(propId, file, 'extra'); }
+  catch(e) { url = await qtFileToBase64(file); }
+  const p = qtDB.find(x=>x.id===propId);
+  if (p) {
+    if (!p.extra_docs) p.extra_docs=[];
+    p.extra_docs.push({url, name:file.name}); qtSchedSave(propId);
+    if (area) area.innerHTML=qtBuildExtraDocsHtml(p); toast('File uploaded','ok');
+  }
+}
+async function qtDeleteExtraDoc(propId, idx) {
+  if (!confirm('Remove this file?')) return;
+  const p = qtDB.find(x=>x.id===propId); if (!p||!p.extra_docs) return;
+  p.extra_docs.splice(idx,1); qtSchedSave(propId);
+  const area = document.getElementById('extra-area-qt-'+propId);
+  if (area) area.innerHTML=qtBuildExtraDocsHtml(p); toast('File removed','ok');
+}
+
+// ── QT EMAIL TAGS ────────────────────────────────────────────
+let qtEmailList = [];
+function qtSetEmailTags(emails) { qtEmailList=emails.filter(Boolean); qtRenderEmailTags(); qtSyncEmailHidden(); }
+function qtClearEmailTags()     { qtEmailList=[]; qtRenderEmailTags(); qtSyncEmailHidden(); }
+function qtRenderEmailTags() {
+  const wrap = document.getElementById('qt-email-tags'); if (!wrap) return;
+  wrap.innerHTML = qtEmailList.map((e,i)=>`<span class="email-tag">${esc(e)}<button class="email-tag-x" onclick="qtRemoveEmail(${i})" type="button">×</button></span>`).join('');
+}
+function qtRemoveEmail(i) { qtEmailList.splice(i,1); qtRenderEmailTags(); qtSyncEmailHidden(); }
+function qtSyncEmailHidden() { const h=document.getElementById('qt-fem'); if(h) h.value=qtEmailList.join(', '); }
+function qtAddEmailFromInput() {
+  const inp=document.getElementById('qt-email-tag-input'); if (!inp) return;
+  const val=inp.value.trim().replace(/,$/,'');
+  if (val && !qtEmailList.includes(val)) { qtEmailList.push(val); qtRenderEmailTags(); qtSyncEmailHidden(); }
+  inp.value='';
+}
+function qtEmailKeydown(e) {
+  if (e.key==='Enter'||e.key===',') { e.preventDefault(); qtAddEmailFromInput(); }
+  if (e.key==='Backspace'&&e.target.value===''&&qtEmailList.length) { qtEmailList.pop(); qtRenderEmailTags(); qtSyncEmailHidden(); }
+}
+function qtEmailInput(e) { if (e.target.value.includes(',')) qtAddEmailFromInput(); }
+
+// ── QT FORM ──────────────────────────────────────────────────
+function qtOpenAdd() {
+  qtClearForm(); qtClearEmailTags();
+  document.getElementById('qt-feid').value='';
+  document.getElementById('qt-form-ttl').textContent='Add Quiet Title Property';
+  document.getElementById('qt-del-btn').style.display='none';
+  document.getElementById('qt-form-ov').classList.add('open');
+}
+function qtOpenEdit(id) {
+  const p = qtDB.find(x=>x.id===id); if (!p) return;
+  document.getElementById('qt-feid').value=id;
+  document.getElementById('qt-form-ttl').textContent='Edit Property';
+  document.getElementById('qt-del-btn').style.display='inline-flex';
+  document.getElementById('qt-fa').value=p.address||'';
+  document.getElementById('qt-fco').value=p.company||'';
+  document.getElementById('qt-flf').value=p.law_firm||'';
+  document.getElementById('qt-fcn').value=p.case_num||'';
+  document.getElementById('qt-fp').value=p.parcel||'';
+  document.getElementById('qt-fc').value=p.county||'';
+  document.getElementById('qt-fst').value=p.state||'';
+  document.getElementById('qt-fds').value=p.date_started||'';
+  document.getElementById('qt-fno').value=p.notes||'';
+  qtSetEmailTags((p.emails||'').split(',').map(e=>e.trim()).filter(Boolean));
+  document.getElementById('qt-form-ov').classList.add('open');
+}
+function qtClearForm() {
+  ['qt-fa','qt-fco','qt-flf','qt-fcn','qt-fp','qt-fc','qt-fst','qt-fds','qt-fno'].forEach(id=>document.getElementById(id).value='');
+}
+function qtCloseForm() { document.getElementById('qt-form-ov').classList.remove('open'); }
+function qtOvClick(e) { if (e.target===document.getElementById('qt-form-ov')) qtCloseForm(); }
+
+async function qtSaveProp() {
+  const addr = document.getElementById('qt-fa').value.trim();
+  if (!addr) { toast('Address is required','err'); return; }
+  const eid = document.getElementById('qt-feid').value;
+  const entry = {
+    id: eid||uid(),
+    address: addr,
+    company: document.getElementById('qt-fco').value.trim(),
+    law_firm: document.getElementById('qt-flf').value.trim(),
+    case_num: document.getElementById('qt-fcn').value.trim(),
+    emails:   document.getElementById('qt-fem').value.trim(),
+    parcel:   document.getElementById('qt-fp').value.trim(),
+    county:   document.getElementById('qt-fc').value.trim(),
+    state:    document.getElementById('qt-fst').value.trim().toUpperCase(),
+    date_started: document.getElementById('qt-fds').value,
+    notes:    document.getElementById('qt-fno').value.trim(),
+    steps: {},
+    foia_url:'', foia_name:'', extra_docs:[],
+    updated_at: new Date().toISOString(),
+  };
+  if (eid) {
+    const idx = qtDB.findIndex(x=>x.id===eid);
+    if (idx!==-1) { entry.steps=qtDB[idx].steps||{}; entry.foia_url=qtDB[idx].foia_url||''; entry.foia_name=qtDB[idx].foia_name||''; entry.extra_docs=qtDB[idx].extra_docs||[]; qtDB[idx]=entry; }
+  } else { qtDB.unshift(entry); }
+  qtCloseForm(); qtRender();
+  setSyncStatus('saving');
+  try { await qtUpsert(entry); setSyncStatus('ok'); toast(eid?'Property updated':'Property added','ok'); }
+  catch(e) { setSyncStatus('err'); toast('Saved locally — sync failed','err'); }
+}
+
+async function qtDelProp() {
+  const eid = document.getElementById('qt-feid').value;
+  const p = qtDB.find(x=>x.id===eid);
+  if (!confirm(`Delete "${p?.address}"?`)) return;
+  qtDB = qtDB.filter(x=>x.id!==eid);
+  qtCloseForm(); qtRender();
+  try { await qtDelete(eid); toast('Property deleted','ok'); }
+  catch(e) { toast('Deleted locally — sync failed','err'); }
+}
 
 </script>
 </body>
