@@ -950,40 +950,40 @@ function updateStateFilter() {
 // ── STATS ─────────────────────────────────────────────────
 function updateStats() {
   const all = DB;
-  document.getElementById('st-total').textContent = all.length;
-  document.getElementById('sb-count').textContent = all.length;
-  const inv = all.reduce((s,p)=>s+(Number(p.price)||0),0);
-  const ifmt = '$'+inv.toLocaleString('en-US',{maximumFractionDigits:0});
-  document.getElementById('sb-inv').textContent = ifmt;
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('st-total',  all.length);
+  set('sb-count',  all.length);
   const progs = all.map(p=>progress(p));
-  document.getElementById('st-prog').textContent = progs.length ? Math.round(progs.reduce((a,b)=>a+b,0)/progs.length)+'%' : '0%';
-  const closed = all.filter(p=>p.steps?.closed).length;
-  document.getElementById('st-closed').textContent = closed;
-  document.getElementById('sb-closed').textContent = closed;
+  set('st-prog', progs.length ? Math.round(progs.reduce((a,b)=>a+b,0)/progs.length)+'%' : '0%');
+  const closed = all.filter(p => p.steps && p.steps.closed).length;
+  set('st-closed', closed);
+  set('sb-closed', closed);
 }
 
 // ── RENDER ────────────────────────────────────────────────
 function render() {
-  updateStats();
-  updateCompanyList();
-  updateStateFilter();
-  const items = getFiltered();
-  const wrap = document.getElementById('props-wrap');
-  wrap.querySelectorAll('.prop-card').forEach(el=>el.remove());
-  const empty = document.getElementById('empty-st');
-  if (!items.length) {
-    empty.style.display = 'block';
-    empty.querySelector('p').textContent = DB.length ? 'No properties match your filters.' : 'No properties yet. Add your first!';
-    return;
-  }
-  empty.style.display = 'none';
-  items.forEach((p, i) => {
-    try {
-      wrap.appendChild(buildCard(sanitizeProp(p)));
-    } catch(err) {
-      console.error('buildCard error for', p.id, err);
+  try {
+    updateStats();
+    updateCompanyList();
+    updateStateFilter();
+    const items = getFiltered();
+    const wrap = document.getElementById('props-wrap');
+    wrap.querySelectorAll('.prop-card').forEach(el=>el.remove());
+    const empty = document.getElementById('empty-st');
+    if (!items.length) {
+      empty.style.display = 'block';
+      empty.querySelector('p').textContent = DB.length ? 'No properties match your filters.' : 'No properties yet. Add your first!';
+      return;
     }
-  });
+    empty.style.display = 'none';
+    items.forEach(p => {
+      try { wrap.appendChild(buildCard(sanitizeProp(p))); }
+      catch(err) { console.error('buildCard error', p.id, err); }
+    });
+  } catch(err) {
+    console.error('render() error:', err);
+    toast('Display error — check console', 'err');
+  }
 }
 
 // Guarantee all fields exist so buildCard never crashes on null/undefined
