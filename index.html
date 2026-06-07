@@ -1101,6 +1101,19 @@ function uid() { return Date.now().toString(36) + Math.random().toString(36).sli
 function esc(s='') { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 function fmtDate(d) { if(!d) return ''; return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
 function daysElapsed(d) { if(!d) return 0; const start = new Date(d+'T00:00:00'); const now = new Date(); now.setHours(0,0,0,0); return Math.max(0, Math.round((now-start)/86400000)); }
+// If denied, freeze the clock at the denial date
+function daysElapsedDisplay(p) {
+  if (!p.date_started) return '';
+  const isDenied = p.steps && p.steps.cert_denied;
+  if (isDenied && p.denied_at) {
+    const start   = new Date(p.date_started + 'T00:00:00');
+    const stopped = new Date(p.denied_at);
+    stopped.setHours(0,0,0,0);
+    const days = Math.max(0, Math.round((stopped - start) / 86400000));
+    return `<span style="color:#c93b2a;font-weight:600;margin-left:6px;text-decoration:line-through">${days}d ✕</span>`;
+  }
+  return `<span style="color:#c97a00;font-weight:600;margin-left:6px">${daysElapsed(p.date_started)}d</span>`;
+}
 function progress(p) {
   if (!p.steps) return 0;
   const isDenied = !!p.steps.cert_denied;
@@ -1256,6 +1269,7 @@ function sanitizeProp(p) {
     updated_at:   p.updated_at   || '',
     archived:     !!p.archived,
     last_edited_by: p.last_edited_by || '',
+    denied_at:    p.denied_at || '',
   };
 }
 
@@ -1305,7 +1319,7 @@ function buildCard(p) {
     (p.county||p.state) ? `<span class="chip">${esc([p.county,p.state].filter(Boolean).join(', '))}</span>` : '',
     p.price  ? `<span class="chip">$${Number(p.price).toLocaleString('en-US',{maximumFractionDigits:0})}</span>` : '',
     p.rate   ? `<span class="chip">${p.rate}% int.</span>` : '',
-    p.date_started ? `<span class="chip">Started: ${fmtDate(p.date_started)}<span style="color:#c97a00;font-weight:600;margin-left:6px">${daysElapsed(p.date_started)}d</span></span>` : '',
+    p.date_started ? `<span class="chip">Started: ${fmtDate(p.date_started)}${daysElapsedDisplay(p)}</span>` : '',
     p.deadline ? `<span class="chip">Deadline: ${fmtDate(p.deadline)}</span>` : '',
   ].join('');
 
@@ -1421,13 +1435,20 @@ function toggleStep(propId, stepId, el) {
       p.steps.cert_denied = false;
       p.steps.outcome_nothing = false;
       p.steps.outcome_qt = false;
+      p.denied_at = '';
     }
-    if (stepId === 'cert_denied' && p.steps.cert_denied) {
-      p.steps.cert_approved = false;
-      // Clear all downstream steps
-      AFTER_DECISION_STEPS.forEach(id => { p.steps[id] = false; });
-      p.steps.outcome_nothing = false;
-      p.steps.outcome_qt = false;
+    if (stepId === 'cert_denied') {
+      if (p.steps.cert_denied) {
+        // Being checked — freeze the clock
+        p.denied_at = new Date().toISOString();
+        p.steps.cert_approved = false;
+        AFTER_DECISION_STEPS.forEach(id => { p.steps[id] = false; });
+        p.steps.outcome_nothing = false;
+        p.steps.outcome_qt = false;
+      } else {
+        // Being unchecked — unfreeze the clock
+        p.denied_at = '';
+      }
     }
 
     el.classList.toggle('done', p.steps[stepId]);
