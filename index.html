@@ -639,6 +639,25 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 .outcome-tile:hover{border-color:var(--bdr2);background:var(--surf3);color:var(--txt)}
 .outcome-tile.selected{background:var(--dng-dim);border-color:rgba(201,59,42,.35);color:var(--dng);font-weight:600}
 .outcome-tile .ot-icon{font-size:16px}
+
+/* QT AMOUNT STEP TILES */
+.qt-amt-step{flex-direction:column;align-items:stretch;gap:6px;cursor:default}
+.qt-amt-step:hover{border-color:var(--bdr2);background:var(--surf3)}
+.qt-amt-check{
+  display:flex;align-items:flex-start;gap:8px;cursor:pointer;
+  flex:1;padding-bottom:2px
+}
+.qt-amt-check:hover .step-lbl{color:var(--txt)}
+.qt-amt-input{
+  background:var(--surf);border:1px solid var(--bdr2);border-radius:6px;
+  padding:5px 8px;font-size:12px;font-family:var(--fm);color:var(--txt);
+  outline:none;width:100%;transition:border-color .14s;
+  -moz-appearance:textfield
+}
+.qt-amt-input::-webkit-inner-spin-button,.qt-amt-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.qt-amt-input:focus{border-color:rgba(50,209,144,.5)}
+.qt-amt-input::placeholder{color:var(--txt3)}
+.qt-amt-step.done .qt-amt-input{border-color:rgba(26,127,168,.3);background:rgba(26,127,168,.04)}
 </style>
 </head>
 <body>
@@ -1902,7 +1921,12 @@ function visitsOvClick(e) { if (e.target === document.getElementById('visits-ov'
 const QT_TABLE = 'qt_properties';
 const QT_STEPS = [
   {id:'sign_ret',   label:'Sign Retainer',         cat:'retainer'},
-  {id:'pay_ret',    label:'Pay Retainer',           cat:'retainer'},
+  {id:'paid_ret',   label:'Paid Retainer',          cat:'retainer', hasAmount:true},
+  {id:'paid_bill1', label:'Paid Bill 1',            cat:'retainer', hasAmount:true},
+  {id:'paid_bill2', label:'Paid Bill 2',            cat:'retainer', hasAmount:true},
+  {id:'paid_bill3', label:'Paid Bill 3',            cat:'retainer', hasAmount:true},
+  {id:'paid_bill4', label:'Paid Bill 4',            cat:'retainer', hasAmount:true},
+  {id:'paid_bill5', label:'Paid Bill 5',            cat:'retainer', hasAmount:true},
   {id:'title_prog', label:'Title Work in Progress', cat:'legal'},
   {id:'research',   label:'Research',               cat:'legal'},
   {id:'lis_pen',    label:'Lis Pendens Filed',      cat:'legal'},
@@ -1913,8 +1937,10 @@ const QT_STEPS = [
   {id:'master',     label:'Referred to Master',     cat:'court'},
   {id:'hearing',    label:'Hearing Date Set',       cat:'court'},
   {id:'final',      label:'Final Order',            cat:'done'},
-  {id:'pay_final',   label:'Pay Final Bill',          cat:'done'},
+  {id:'pay_final',  label:'Pay Final Bill',         cat:'done', hasAmount:true},
 ];
+// Amount-bearing step IDs
+const QT_AMOUNT_STEPS = QT_STEPS.filter(s=>s.hasAmount).map(s=>s.id);
 const QT_CAT_LBL = {retainer:'Retainer', legal:'Legal Process', court:'Court', done:'Completion'};
 const QT_CAT_COLOR = {retainer:'var(--info)', legal:'var(--pur)', court:'var(--acc)', done:'var(--teal)'};
 
@@ -2086,7 +2112,18 @@ function qtSanitizeProp(p) {
     updated_at:   p.updated_at   || '',
     archived:     !!p.archived,
     last_edited_by: p.last_edited_by || '',
+    qt_amounts:   (p.qt_amounts && typeof p.qt_amounts === 'object') ? p.qt_amounts : {},
   };
+}
+
+// ── QT TOTAL PAID ────────────────────────────────────────────
+function calcQtTotal(p) {
+  if (!p.qt_amounts) return 0;
+  return QT_AMOUNT_STEPS.reduce((sum, id) => sum + (parseFloat(p.qt_amounts[id]) || 0), 0);
+}
+function fmtMoney(n) {
+  if (!n) return '$0';
+  return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
 // ── QT BUILD CARD ────────────────────────────────────────────
@@ -2101,26 +2138,43 @@ function qtBuildCard(p) {
   QT_STEPS.forEach((s,i) => {
     if (s.cat !== lastCat) { stepsHtml += `<div class="cat-div">${QT_CAT_LBL[s.cat]}</div>`; lastCat = s.cat; }
     const done = !!(p.steps && p.steps[s.id]);
-    stepsHtml += `<div class="step${done?' done':''}" data-cat="${s.cat}" onclick="qtToggleStep('${p.id}','${s.id}',this)">
-      <div class="step-num">${i+1}</div>
-      <div class="step-lbl">${s.label}</div>
-      <div class="step-chk">✓</div>
-    </div>`;
+    const amt  = p.qt_amounts?.[s.id] || '';
+    if (s.hasAmount) {
+      stepsHtml += `<div class="step qt-amt-step${done?' done':''}" data-cat="${s.cat}">
+        <div class="qt-amt-check" onclick="qtToggleStep('${p.id}','${s.id}',this.closest('.step'))">
+          <div class="step-num">${i+1}</div>
+          <div class="step-lbl">${s.label}</div>
+          <div class="step-chk">✓</div>
+        </div>
+        <input class="qt-amt-input" type="number" placeholder="0.00" min="0" step="0.01"
+          value="${esc(String(amt))}"
+          onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
+          oninput="event.stopPropagation();qtUpdateAmount('${p.id}','${s.id}',this.value)"
+          onkeydown="event.stopPropagation()" />
+      </div>`;
+    } else {
+      stepsHtml += `<div class="step${done?' done':''}" data-cat="${s.cat}" onclick="qtToggleStep('${p.id}','${s.id}',this)">
+        <div class="step-num">${i+1}</div>
+        <div class="step-lbl">${s.label}</div>
+        <div class="step-chk">✓</div>
+      </div>`;
+    }
   });
 
-  // QT-specific step colors (cat names differ so we need inline overrides)
-  // retainer=info, legal=pur, court=acc, done=teal — matches CSS via data-cat mapping below
+  // retainer=info, legal=pur, court=acc, done=teal
 
   const prColor = pr===100?'var(--teal)':pr>0?'var(--acc)':'var(--txt3)';
 
   const emailList2 = (p.emails||'').split(',').map(e=>e.trim()).filter(Boolean);
   const emailPills2 = emailList2.map(e=>`<a href="mailto:${esc(e)}" style="color:var(--info);font-size:12px;font-family:var(--fm);text-decoration:none" onclick="event.stopPropagation()">${esc(e)}</a>`).join('<span style="color:var(--txt3);margin:0 4px">·</span>');
 
+  const qtTotal = calcQtTotal(p);
   const chips = [
     p.parcel  ? `<span class="chip">${esc(p.parcel)}</span>` : '',
     (p.county||p.state) ? `<span class="chip">${esc([p.county,p.state].filter(Boolean).join(', '))}</span>` : '',
     p.case_num ? `<span class="chip">Case: ${esc(p.case_num)}</span>` : '',
     p.date_started ? `<span class="chip">Started: ${fmtDate(p.date_started)}<span style="color:#c97a00;font-weight:600;margin-left:6px">${daysElapsed(p.date_started)}d</span></span>` : '',
+    qtTotal > 0 ? `<span class="chip" style="color:var(--teal);border-color:rgba(50,209,144,.3);background:var(--teal-dim)">Total Paid: <strong>${fmtMoney(qtTotal)}</strong></span>` : '',
     p.foia_url ? `<span class="foia-badge"><span class="foia-badge-dot"></span>FOIA Uploaded</span>` : '',
   ].join('');
 
@@ -2259,6 +2313,26 @@ function qtFieldUpdate(id, field, value) {
   p[field] = value;
   qtSchedSave(id);
   if (field==='company') qtUpdateCompanyList();
+}
+
+// ── QT AMOUNT UPDATE ─────────────────────────────────────────
+function qtUpdateAmount(propId, stepId, value) {
+  const p = qtDB.find(x=>x.id===propId);
+  if (!p) return;
+  if (!p.qt_amounts) p.qt_amounts = {};
+  p.qt_amounts[stepId] = parseFloat(value) || 0;
+  p.updated_at = new Date().toISOString();
+  // Update total chip live
+  const card = document.querySelector(`.prop-card[data-id="${propId}"]`);
+  if (card) {
+    const totalEl = card.querySelector('.qt-total-chip');
+    if (totalEl) {
+      const tot = calcQtTotal(p);
+      totalEl.style.display = tot > 0 ? '' : 'none';
+      totalEl.innerHTML = `Total Paid: <strong>${fmtMoney(tot)}</strong>`;
+    }
+  }
+  qtSchedSave(propId);
 }
 
 function qtToggleStep(propId, stepId, el) {
@@ -2476,12 +2550,13 @@ async function qtSaveProp() {
     date_started: document.getElementById('qt-fds').value,
     notes:    document.getElementById('qt-fno').value.trim(),
     steps: {},
+    qt_amounts: {},
     foia_url:'', foia_name:'', extra_docs:[],
     updated_at: new Date().toISOString(),
   };
   if (eid) {
     const idx = qtDB.findIndex(x=>x.id===eid);
-    if (idx!==-1) { entry.steps=qtDB[idx].steps||{}; entry.foia_url=qtDB[idx].foia_url||''; entry.foia_name=qtDB[idx].foia_name||''; entry.extra_docs=qtDB[idx].extra_docs||[]; qtDB[idx]=entry; }
+    if (idx!==-1) { entry.steps=qtDB[idx].steps||{}; entry.qt_amounts=qtDB[idx].qt_amounts||{}; entry.foia_url=qtDB[idx].foia_url||''; entry.foia_name=qtDB[idx].foia_name||''; entry.extra_docs=qtDB[idx].extra_docs||[]; qtDB[idx]=entry; }
   } else { qtDB.unshift(entry); }
   qtCloseForm(); qtRender();
   setSyncStatus('saving');
