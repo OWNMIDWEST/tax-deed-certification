@@ -835,8 +835,40 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
     </div>
   </div>
 
+
+<!-- PAGE 3: ACTIVITY LOG -->
+<div id="page3" style="display:none;flex:1;flex-direction:column">
+  <div class="topbar">
+    <div class="topbar-l">
+      <div class="topbar-title">Activity Log</div>
+      <div class="topbar-sub">Every step check / uncheck logged with who and when</div>
+    </div>
+    <div class="topbar-r">
+      <button class="btn btn-ghost btn-sm" onclick="loadActivity()">↻ Refresh</button>
+    </div>
+  </div>
+  <div class="activity-wrap">
+    <div class="activity-feed" id="activity-feed">
+      <div class="visits-loading">Loading activity…</div>
+    </div>
+  </div>
 </div>
+
+<!-- PAGE 4: ARCHIVE -->
+<div id="page4" style="display:none;flex:1;flex-direction:column">
+  <div class="topbar">
+    <div class="topbar-l">
+      <div class="topbar-title">Archive</div>
+      <div class="topbar-sub">Archived properties — restore or permanently delete</div>
+    </div>
+  </div>
+  <div class="archive-wrap" id="archive-wrap">
+    <div class="visits-loading" id="archive-loading">Loading…</div>
+  </div>
 </div>
+
+</div><!-- end .main -->
+</div><!-- end .shell -->
 
 <!-- ADD/EDIT MODAL -->
 <div class="overlay" id="form-ov" onclick="ovClick(event)">
@@ -876,37 +908,6 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 </div>
 
 <div class="toast-wrap" id="toasts"></div>
-
-<!-- PAGE 3: ACTIVITY LOG -->
-<div id="page3" style="display:none;flex:1;flex-direction:column">
-  <div class="topbar">
-    <div class="topbar-l">
-      <div class="topbar-title">Activity Log</div>
-      <div class="topbar-sub">Every step check / uncheck logged with who and when</div>
-    </div>
-    <div class="topbar-r">
-      <button class="btn btn-ghost btn-sm" onclick="loadActivity()">↻ Refresh</button>
-    </div>
-  </div>
-  <div class="activity-wrap">
-    <div class="activity-feed" id="activity-feed">
-      <div class="visits-loading">Loading activity…</div>
-    </div>
-  </div>
-</div>
-
-<!-- PAGE 4: ARCHIVE -->
-<div id="page4" style="display:none;flex:1;flex-direction:column">
-  <div class="topbar">
-    <div class="topbar-l">
-      <div class="topbar-title">Archive</div>
-      <div class="topbar-sub">Archived properties — restore or permanently delete</div>
-    </div>
-  </div>
-  <div class="archive-wrap" id="archive-wrap">
-    <div class="visits-loading" id="archive-loading">Loading…</div>
-  </div>
-</div>
 
 <!-- MOBILE BOTTOM NAV -->
 <nav class="mobile-nav" id="mobile-nav">
