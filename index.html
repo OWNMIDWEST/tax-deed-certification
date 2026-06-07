@@ -664,6 +664,23 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 .qt-amt-input:focus{border-color:rgba(50,209,144,.5)}
 .qt-amt-input::placeholder{color:var(--txt3)}
 .qt-amt-step.done .qt-amt-input{border-color:rgba(26,127,168,.3);background:rgba(26,127,168,.04)}
+
+/* CERT STATUS INDICATOR next to address */
+.cert-status{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  font-size:13px;font-weight:700;line-height:1;margin-top:2px
+}
+.cert-status.approved{
+  background:rgba(14,158,101,0.15);color:var(--teal);
+  border:1.5px solid rgba(14,158,101,0.4)
+}
+.cert-status.denied{
+  background:rgba(201,59,42,0.13);color:var(--dng);
+  border:1.5px solid rgba(201,59,42,0.35)
+}
+.addr-row{display:flex;align-items:flex-start;gap:8px;width:100%}
+.addr-row .field-address{flex:1}
 </style>
 </head>
 <body>
@@ -1357,10 +1374,14 @@ function buildCard(p) {
     <div class="card-hd">
       <div class="card-hd-top">
         <div class="card-hd-fields">
-          <input class="field-address" value="${esc(p.address)}" placeholder="Property Address"
-            onclick="event.stopPropagation()"
-            oninput="fieldUpdate('${p.id}','address',this.value)"
-            onfocus="event.stopPropagation()" />
+          <div class="addr-row">
+            ${p.steps && p.steps.cert_approved ? '<span class="cert-status approved" title="Certification Approved">✓</span>' : ''}
+            ${p.steps && p.steps.cert_denied   ? '<span class="cert-status denied"   title="Certification Denied">✕</span>'   : ''}
+            <input class="field-address" value="${esc(p.address)}" placeholder="Property Address"
+              onclick="event.stopPropagation()"
+              oninput="fieldUpdate('${p.id}','address',this.value)"
+              onfocus="event.stopPropagation()" />
+          </div>
           <div class="hd-row">
             <span class="field-label">Company</span>
             <input class="field-inline" value="${esc(p.company||'')}" placeholder="Company name"
@@ -2270,9 +2291,31 @@ function qtBuildCard(p) {
 }
 
 // ── REBUILD STEPS GRID (called after denied/approved toggle) ────────────────
+function refreshCertIndicator(card, p) {
+  const row = card.querySelector('.addr-row');
+  if (!row) return;
+  // Remove existing indicator
+  row.querySelectorAll('.cert-status').forEach(el => el.remove());
+  const inp = row.querySelector('.field-address');
+  if (p.steps && p.steps.cert_approved) {
+    const el = document.createElement('span');
+    el.className = 'cert-status approved';
+    el.title = 'Certification Approved';
+    el.textContent = '✓';
+    row.insertBefore(el, inp);
+  } else if (p.steps && p.steps.cert_denied) {
+    const el = document.createElement('span');
+    el.className = 'cert-status denied';
+    el.title = 'Certification Denied';
+    el.textContent = '✕';
+    row.insertBefore(el, inp);
+  }
+}
+
 function rebuildStepsGrid(card, p) {
   const grid = card.querySelector('.steps-grid');
   if (!grid) return;
+  refreshCertIndicator(card, p);
   const isDenied = !!(p.steps && p.steps.cert_denied);
   let html = '';
   let lastCat = null;
