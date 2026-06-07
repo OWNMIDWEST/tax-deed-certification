@@ -409,17 +409,23 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 .prop-card.open .toggle-bar .toggle-label{color:var(--acc)}
 /* MINIMIZE BUTTON — shown only when card is open */
 .minimize-btn{
-  display:none;align-items:center;gap:5px;
-  position:absolute;top:10px;right:14px;
+  display:none;align-items:center;gap:4px;
   background:var(--surf2);border:1px solid var(--bdr2);
-  border-radius:20px;padding:4px 12px;
-  font-size:11px;font-weight:600;color:var(--txt3);
+  border-radius:8px;padding:5px 11px;
+  font-size:12px;font-weight:500;color:var(--txt2);
   cursor:pointer;transition:all .15s;font-family:var(--fb);
-  z-index:5
 }
-.minimize-btn:hover{background:var(--surf3);color:var(--txt);border-color:var(--bdr2)}
+.minimize-btn:hover{background:var(--surf3);color:var(--txt)}
+.save-min-btn{
+  display:none;align-items:center;gap:4px;
+  background:var(--acc);border:none;
+  border-radius:8px;padding:5px 11px;
+  font-size:12px;font-weight:600;color:var(--acc-dk);
+  cursor:pointer;transition:all .15s;font-family:var(--fb);
+}
+.save-min-btn:hover{filter:brightness(1.08)}
 .prop-card.open .minimize-btn{display:inline-flex}
-.prop-card{position:relative}
+.prop-card.open .save-min-btn{display:inline-flex}
 .toggle-steps-preview{display:flex;align-items:center;gap:5px}
 .mini-step{
   width:8px;height:8px;border-radius:50%;
@@ -1367,9 +1373,10 @@ function buildCard(p) {
           </div>
         </div>
         <div class="card-hd-actions">
+          <button class="minimize-btn" onclick="event.stopPropagation();minimizeCard(this)">▲ Minimize</button>
+          <button class="save-min-btn" onclick="event.stopPropagation();saveAndMinimize(this,'${p.id}','td')">✓ Save</button>
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEdit('${p.id}')">Edit</button>
         </div>
-        <button class="minimize-btn" onclick="minimizeCard(this)" title="Minimize">▲ Minimize</button>
       </div>
     </div>
     <div class="card-meta">
@@ -1422,6 +1429,18 @@ function toggleCard(el) {
 }
 function minimizeCard(el) {
   el.closest('.prop-card').classList.remove('open');
+}
+async function saveAndMinimize(el, propId, type) {
+  const card = el.closest('.prop-card');
+  if (type === 'qt') {
+    const p = qtDB.find(x=>x.id===propId);
+    if (p) { await qtPersist(propId); }
+  } else {
+    const p = DB.find(x=>x.id===propId);
+    if (p) { await persistProp(propId); }
+  }
+  card.classList.remove('open');
+  toast('Saved ✓', 'ok');
 }
 
 function toggleExpandAll() {
@@ -2174,7 +2193,7 @@ function qtBuildCard(p) {
     (p.county||p.state) ? `<span class="chip">${esc([p.county,p.state].filter(Boolean).join(', '))}</span>` : '',
     p.case_num ? `<span class="chip">Case: ${esc(p.case_num)}</span>` : '',
     p.date_started ? `<span class="chip">Started: ${fmtDate(p.date_started)}<span style="color:#c97a00;font-weight:600;margin-left:6px">${daysElapsed(p.date_started)}d</span></span>` : '',
-    qtTotal > 0 ? `<span class="chip" style="color:var(--teal);border-color:rgba(50,209,144,.3);background:var(--teal-dim)">Total Paid: <strong>${fmtMoney(qtTotal)}</strong></span>` : '',
+    `<span class="chip" style="color:var(--teal);border-color:rgba(50,209,144,.3);background:var(--teal-dim)">Total Paid: <strong>${fmtMoney(qtTotal)}</strong></span>`,
     p.foia_url ? `<span class="foia-badge"><span class="foia-badge-dot"></span>FOIA Uploaded</span>` : '',
   ].join('');
 
@@ -2205,9 +2224,10 @@ function qtBuildCard(p) {
           </div>
         </div>
         <div class="card-hd-actions">
+          <button class="minimize-btn" onclick="event.stopPropagation();minimizeCard(this)">▲ Minimize</button>
+          <button class="save-min-btn" onclick="event.stopPropagation();saveAndMinimize(this,'${p.id}','qt')">✓ Save</button>
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();qtOpenEdit('${p.id}')">Edit</button>
         </div>
-        <button class="minimize-btn" onclick="minimizeCard(this)" title="Minimize">▲ Minimize</button>
       </div>
     </div>
     <div class="card-meta">
