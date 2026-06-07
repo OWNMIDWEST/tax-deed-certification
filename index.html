@@ -2222,9 +2222,12 @@ function qtBuildCard(p) {
     <div class="card-hd">
       <div class="card-hd-top">
         <div class="card-hd-fields">
-          <input class="field-address" value="${esc(p.address)}" placeholder="Property Address"
-            onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
-            oninput="qtFieldUpdate('${p.id}','address',this.value)" />
+          <div class="addr-row">
+            ${p.steps && p.steps.final ? '<span class="cert-status approved" title="Final Order Received">✓</span>' : ''}
+            <input class="field-address" value="${esc(p.address)}" placeholder="Property Address"
+              onclick="event.stopPropagation()" onfocus="event.stopPropagation()"
+              oninput="qtFieldUpdate('${p.id}','address',this.value)" />
+          </div>
           <div class="hd-row">
             <span class="field-label">Company</span>
             <input class="field-inline" value="${esc(p.company||'')}" placeholder="Company name"
@@ -2419,6 +2422,20 @@ function qtToggleStep(propId, stepId, el) {
     if (lbl) { lbl.style.color=prColor; lbl.textContent=pr+'% complete'; }
     qtUpdateStats();
     qtSchedSave(propId);
+    // Refresh Final Order indicator in header
+    if (stepId === 'final') {
+      const addrRow = card.querySelector('.addr-row');
+      if (addrRow) {
+        addrRow.querySelectorAll('.cert-status').forEach(el => el.remove());
+        if (p.steps.final) {
+          const ind = document.createElement('span');
+          ind.className = 'cert-status approved';
+          ind.title = 'Final Order Received';
+          ind.textContent = '✓';
+          addrRow.insertBefore(ind, addrRow.querySelector('.field-address'));
+        }
+      }
+    }
     logActivity(propId, p.address, 'qt', stepLabel, p.steps[stepId] ? 'checked' : 'unchecked');
     toast(p.steps[stepId]?'✓ Step complete':'Step unchecked','ok');
   };
