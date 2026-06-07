@@ -406,8 +406,20 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 .toggle-label{font-size:12px;font-weight:600;color:var(--txt2);letter-spacing:.02em}
 .toggle-bar:hover .toggle-label{color:var(--acc)}
 .toggle-chevron{color:var(--txt3);transition:transform .22s;flex-shrink:0}
-.prop-card.open .toggle-bar .toggle-chevron{transform:rotate(180deg)}
 .prop-card.open .toggle-bar .toggle-label{color:var(--acc)}
+/* MINIMIZE BUTTON — shown only when card is open */
+.minimize-btn{
+  display:none;align-items:center;gap:5px;
+  position:absolute;top:10px;right:14px;
+  background:var(--surf2);border:1px solid var(--bdr2);
+  border-radius:20px;padding:4px 12px;
+  font-size:11px;font-weight:600;color:var(--txt3);
+  cursor:pointer;transition:all .15s;font-family:var(--fb);
+  z-index:5
+}
+.minimize-btn:hover{background:var(--surf3);color:var(--txt);border-color:var(--bdr2)}
+.prop-card.open .minimize-btn{display:inline-flex}
+.prop-card{position:relative}
 .toggle-steps-preview{display:flex;align-items:center;gap:5px}
 .mini-step{
   width:8px;height:8px;border-radius:50%;
@@ -1324,6 +1336,7 @@ function buildCard(p) {
         <div class="card-hd-actions">
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEdit('${p.id}')">Edit</button>
         </div>
+        <button class="minimize-btn" onclick="minimizeCard(this)" title="Minimize">▲ Minimize</button>
       </div>
     </div>
     <div class="card-meta">
@@ -1340,10 +1353,7 @@ function buildCard(p) {
         </div>
       </div>
       <div class="toggle-bar-right">
-        <span class="toggle-label">View Details</span>
-        <svg class="toggle-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <span class="toggle-label">▾ View Details</span>
       </div>
     </button>
     <div class="prog-bar"><div class="prog-fill" style="width:${pr}%"></div></div>
@@ -1373,11 +1383,17 @@ function buildCard(p) {
 
 
 // ── INTERACTIONS ─────────────────────────────────────────
-function toggleCard(el) { el.closest('.prop-card').classList.toggle('open'); }
+function toggleCard(el) {
+  // Only opens the card — use the minimize button (▲) to close
+  el.closest('.prop-card').classList.add('open');
+}
+function minimizeCard(el) {
+  el.closest('.prop-card').classList.remove('open');
+}
 
 function toggleExpandAll() {
   allOpen = !allOpen;
-  document.querySelectorAll('.prop-card').forEach(c=>c.classList.toggle('open',allOpen));
+  document.querySelectorAll('#props-wrap .prop-card').forEach(c=>c.classList.toggle('open',allOpen));
   document.getElementById('exp-btn').textContent = allOpen ? 'Collapse All' : 'Expand All';
 }
 
@@ -2116,6 +2132,7 @@ function qtBuildCard(p) {
         <div class="card-hd-actions">
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();qtOpenEdit('${p.id}')">Edit</button>
         </div>
+        <button class="minimize-btn" onclick="minimizeCard(this)" title="Minimize">▲ Minimize</button>
       </div>
     </div>
     <div class="card-meta">
@@ -2131,10 +2148,7 @@ function qtBuildCard(p) {
         </div>
       </div>
       <div class="toggle-bar-right">
-        <span class="toggle-label">View Details</span>
-        <svg class="toggle-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <span class="toggle-label">▾ View Details</span>
       </div>
     </button>
     <div class="prog-bar"><div class="prog-fill" style="width:${pr}%"></div></div>
