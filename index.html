@@ -605,6 +605,28 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 .archive-card-addr{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--txt2)}
 .archive-card-meta{font-size:11px;color:var(--txt3);font-family:var(--fm);margin-top:3px}
 .archive-wrap{flex:1;overflow-y:auto}
+
+/* DENIED STEP — red color scheme */
+.step.done[data-cat=denied]{background:var(--dng-dim);border-color:rgba(201,59,42,.3)}
+.step.done[data-cat=denied] .step-lbl{color:var(--dng)}
+.step.done[data-cat=denied] .step-num{background:var(--dng);color:#fff;border-color:transparent}
+.step.done[data-cat=denied] .step-chk{opacity:1;color:var(--dng)}
+.step[data-cat=denied]:hover{border-color:rgba(201,59,42,.25)}
+
+/* DENIED OUTCOME TILES */
+.outcome-section{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.outcome-lbl{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--dng);text-transform:uppercase}
+.outcome-tiles{display:flex;gap:10px;flex-wrap:wrap}
+.outcome-tile{
+  display:flex;align-items:center;gap:8px;padding:10px 16px;
+  border-radius:var(--r);border:1px solid var(--bdr2);
+  background:var(--surf2);cursor:pointer;transition:all .16s;
+  font-size:13px;font-weight:500;color:var(--txt2);
+  user-select:none
+}
+.outcome-tile:hover{border-color:var(--bdr2);background:var(--surf3);color:var(--txt)}
+.outcome-tile.selected{background:var(--dng-dim);border-color:rgba(201,59,42,.35);color:var(--dng);font-weight:600}
+.outcome-tile .ot-icon{font-size:16px}
 </style>
 </head>
 <body>
@@ -952,19 +974,27 @@ const SK      = 'taxdeed_local_v3';
 
 // ── STEPS ───────────────────────────────────────────────
 const STEPS = [
-  {id:'cert_req',  label:'Certification Requested',        cat:'cert'},
-  {id:'cert_paid', label:'Certification Paid',              cat:'cert'},
-  {id:'cert_proc', label:'Certification Evaluation',        cat:'cert'},
-  {id:'cert_da',   label:'Certification Denied / Approved', cat:'cert'},
-  {id:'title_req', label:'Request Title Work / MunI',       cat:'title'},
-  {id:'title_paid',label:'Title Work Paid',                 cat:'title'},
-  {id:'title_prog',label:'Title Work in Progress',          cat:'title'},
-  {id:'title_rev', label:'Title Work Reviewed',             cat:'title'},
-  {id:'close_date',label:'Closing Date Chosen',             cat:'closing'},
-  {id:'close_paid',label:'Paid Final Certification Amount', cat:'closing'},
-  {id:'closed',    label:'Property Closed',                 cat:'done'},
+  {id:'cert_req',      label:'Certification Requested',        cat:'cert'},
+  {id:'cert_paid',     label:'Certification Paid',             cat:'cert'},
+  {id:'cert_proc',     label:'Certification Evaluation',       cat:'cert'},
+  {id:'cert_approved', label:'Certification Approved',         cat:'cert'},
+  {id:'cert_denied',   label:'Certification Denied',           cat:'denied'},
+  {id:'title_req',     label:'Request Title Work / MunI',      cat:'title'},
+  {id:'title_paid',    label:'Title Work Paid',                cat:'title'},
+  {id:'title_prog',    label:'Title Work in Progress',         cat:'title'},
+  {id:'title_rev',     label:'Title Work Reviewed',            cat:'title'},
+  {id:'close_date',    label:'Closing Date Chosen',            cat:'closing'},
+  {id:'close_paid',    label:'Paid Final Certification Amount',cat:'closing'},
+  {id:'closed',        label:'Property Closed',                cat:'done'},
 ];
-const CAT_LBL = {cert:'Certification',title:'Title Work',closing:'Closing',done:'Completion'};
+// Steps that are hidden when denied
+const AFTER_DECISION_STEPS = ['title_req','title_paid','title_prog','title_rev','close_date','close_paid','closed'];
+// Outcome options shown when denied
+const DENIED_OUTCOMES = [
+  {id:'outcome_nothing', label:'Do Nothing',           icon:'🚫'},
+  {id:'outcome_qt',      label:'Moved to Quiet Title', icon:'⚖️'},
+];
+const CAT_LBL = {cert:'Certification',denied:'Decision',title:'Title Work',closing:'Closing',done:'Completion'};
 
 // ── STATE ────────────────────────────────────────────────
 let DB = [];
@@ -1061,9 +1091,20 @@ function fmtDate(d) { if(!d) return ''; return new Date(d+'T00:00:00').toLocaleD
 function daysElapsed(d) { if(!d) return 0; const start = new Date(d+'T00:00:00'); const now = new Date(); now.setHours(0,0,0,0); return Math.max(0, Math.round((now-start)/86400000)); }
 function progress(p) {
   if (!p.steps) return 0;
-  return Math.round(STEPS.filter(s=>p.steps[s.id]).length / STEPS.length * 100);
+  const isDenied = !!p.steps.cert_denied;
+  // When denied: only count up to and including cert_denied (5 steps max)
+  const activeSteps = isDenied
+    ? STEPS.filter(s => !AFTER_DECISION_STEPS.includes(s.id))
+    : STEPS;
+  const done = activeSteps.filter(s=>p.steps[s.id]).length;
+  return Math.round(done / activeSteps.length * 100);
 }
-function stepsDone(p) { return p.steps ? STEPS.filter(s=>p.steps[s.id]).length : 0; }
+function stepsDone(p) {
+  if (!p.steps) return 0;
+  const isDenied = !!p.steps.cert_denied;
+  const activeSteps = isDenied ? STEPS.filter(s=>!AFTER_DECISION_STEPS.includes(s.id)) : STEPS;
+  return activeSteps.filter(s=>p.steps[s.id]).length;
+}
 
 // ── DEBOUNCED FIELD SAVE ─────────────────────────────────
 function schedSave(id) {
@@ -1213,9 +1254,12 @@ function buildCard(p) {
   card.dataset.id = p.id;
 
   // Steps HTML
+  const isDenied = !!(p.steps && p.steps.cert_denied);
   let stepsHtml = '';
   let lastCat = null;
   STEPS.forEach((s,i) => {
+    // Hide post-decision steps if denied
+    if (isDenied && AFTER_DECISION_STEPS.includes(s.id)) return;
     if (s.cat !== lastCat) { stepsHtml += `<div class="cat-div">${CAT_LBL[s.cat]}</div>`; lastCat = s.cat; }
     const done = !!(p.steps && p.steps[s.id]);
     stepsHtml += `<div class="step${done?' done':''}" data-cat="${s.cat}" onclick="toggleStep('${p.id}','${s.id}',this)">
@@ -1224,6 +1268,23 @@ function buildCard(p) {
       <div class="step-chk">✓</div>
     </div>`;
   });
+  // If denied: show outcome options
+  if (isDenied) {
+    const nothingDone = !!(p.steps && p.steps.outcome_nothing);
+    const qtDone      = !!(p.steps && p.steps.outcome_qt);
+    stepsHtml += `
+      <div class="outcome-section">
+        <div class="outcome-lbl">Next Step</div>
+        <div class="outcome-tiles">
+          ${DENIED_OUTCOMES.map(o => {
+            const sel = !!(p.steps && p.steps[o.id]);
+            return `<div class="outcome-tile${sel?' selected':''}" onclick="toggleOutcome('${p.id}','${o.id}',this)">
+              <span class="ot-icon">${o.icon}</span>${o.label}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
 
   const prColor = pr===100?'var(--teal)':pr>0?'var(--acc)':'var(--txt3)';
   const chips = [
@@ -1338,11 +1399,29 @@ function toggleStep(propId, stepId, el) {
     p.steps[stepId] = !wasChecked;
     p.last_edited_by = currentUser || 'Unknown';
     p.updated_at = new Date().toISOString();
+
+    // Mutual exclusion: approved ↔ denied
+    if (stepId === 'cert_approved' && p.steps.cert_approved) {
+      p.steps.cert_denied = false;
+      p.steps.outcome_nothing = false;
+      p.steps.outcome_qt = false;
+    }
+    if (stepId === 'cert_denied' && p.steps.cert_denied) {
+      p.steps.cert_approved = false;
+      // Clear all downstream steps
+      AFTER_DECISION_STEPS.forEach(id => { p.steps[id] = false; });
+      p.steps.outcome_nothing = false;
+      p.steps.outcome_qt = false;
+    }
+
     el.classList.toggle('done', p.steps[stepId]);
-    // update timestamp display
     const tsEl = el.closest('.prop-card')?.querySelector('.card-timestamp');
     if (tsEl) tsEl.innerHTML = '<span class="card-timestamp-dot"></span>' + timeAgo(p.updated_at) + (currentUser ? ' · ' + esc(currentUser) : '');
+
+    // Rebuild steps grid so denied/approved state fully re-renders
     const card = el.closest('.prop-card');
+    rebuildStepsGrid(card, p);
+
     const pr = progress(p);
     card.querySelector('.prog-fill').style.width = pr+'%';
     const prColor = pr===100?'var(--teal)':pr>0?'var(--acc)':'var(--txt3)';
@@ -2079,6 +2158,58 @@ function qtBuildCard(p) {
     </div>
   `;
   return card;
+}
+
+// ── REBUILD STEPS GRID (called after denied/approved toggle) ────────────────
+function rebuildStepsGrid(card, p) {
+  const grid = card.querySelector('.steps-grid');
+  if (!grid) return;
+  const isDenied = !!(p.steps && p.steps.cert_denied);
+  let html = '';
+  let lastCat = null;
+  STEPS.forEach((s,i) => {
+    if (isDenied && AFTER_DECISION_STEPS.includes(s.id)) return;
+    if (s.cat !== lastCat) { html += `<div class="cat-div">${CAT_LBL[s.cat]}</div>`; lastCat = s.cat; }
+    const done = !!(p.steps && p.steps[s.id]);
+    html += `<div class="step${done?' done':''}" data-cat="${s.cat}" onclick="toggleStep('${p.id}','${s.id}',this)">
+      <div class="step-num">${i+1}</div>
+      <div class="step-lbl">${s.label}</div>
+      <div class="step-chk">✓</div>
+    </div>`;
+  });
+  if (isDenied) {
+    html += `<div class="outcome-section">
+      <div class="outcome-lbl">Next Step</div>
+      <div class="outcome-tiles">
+        ${DENIED_OUTCOMES.map(o => {
+          const sel = !!(p.steps && p.steps[o.id]);
+          return `<div class="outcome-tile${sel?' selected':''}" onclick="toggleOutcome('${p.id}','${o.id}',this)">
+            <span class="ot-icon">${o.icon}</span>${o.label}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+// ── TOGGLE OUTCOME (Do Nothing / Moved to QT) ────────────────────────────────
+function toggleOutcome(propId, outcomeId, el) {
+  const p = DB.find(x=>x.id===propId);
+  if (!p) return;
+  if (!p.steps) p.steps = {};
+  // Toggle — only one outcome can be selected at a time
+  const wasSelected = !!p.steps[outcomeId];
+  p.steps.outcome_nothing = false;
+  p.steps.outcome_qt      = false;
+  if (!wasSelected) p.steps[outcomeId] = true;
+  p.updated_at = new Date().toISOString();
+  p.last_edited_by = currentUser || 'Unknown';
+  // Re-render outcome tiles
+  const card = el.closest('.prop-card');
+  rebuildStepsGrid(card, p);
+  schedSave(propId);
+  if (!wasSelected) toast('Outcome: ' + DENIED_OUTCOMES.find(o=>o.id===outcomeId)?.label, 'ok');
 }
 
 // ── QT STEP COLORS: retainer=info, legal=pur, court=acc, done=teal ───────────
