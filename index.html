@@ -1118,6 +1118,7 @@ function setSyncStatus(s) {
 // ── INIT ─────────────────────────────────────────────────
 async function init() {
   initName();
+  fetchLocation(); // runs in background, no await
   DB = loadLocal();
   if (DB.length) { render(); }
   try {
@@ -1882,10 +1883,23 @@ async function deleteExtraDoc(propId, idx) {
 
 
 // ── VISIT TRACKING ───────────────────────────────────────────────────────────
+async function fetchLocation() {
+  try {
+    const r = await fetch('https://ipapi.co/json/', {cache:'no-store'});
+    const d = await r.json();
+    if (d && d.city) {
+      currentLocation = [d.city, d.region_code || d.region, d.country_code].filter(Boolean).join(', ');
+    } else if (d && d.country_name) {
+      currentLocation = d.country_name;
+    }
+  } catch(e) { currentLocation = ''; }
+}
+
 async function logVisit() {
   try {
+    if (!currentLocation) await fetchLocation();
     const ua = navigator.userAgent;
-    const browser = ua.includes('Chrome') ? 'Chrome' : ua.includes('Firefox') ? 'Firefox' : ua.includes('Safari') ? 'Safari' : ua.includes('Edge') ? 'Edge' : 'Other';
+    const browser = ua.includes('Edg') ? 'Edge' : ua.includes('Chrome') ? 'Chrome' : ua.includes('Firefox') ? 'Firefox' : ua.includes('Safari') ? 'Safari' : 'Other';
     const os = ua.includes('Windows') ? 'Windows' : ua.includes('Mac') ? 'macOS' : ua.includes('iPhone')||ua.includes('iPad') ? 'iOS' : ua.includes('Android') ? 'Android' : 'Other';
     const screen_size = window.innerWidth + 'x' + window.innerHeight;
     await fetch(`${SB_URL}/rest/v1/visits`, {
@@ -1894,7 +1908,8 @@ async function logVisit() {
       body: JSON.stringify({
         id: uid(),
         visited_at: new Date().toISOString(),
-        browser, os, screen_size
+        browser, os, screen_size,
+        location: currentLocation || 'Unknown'
       })
     });
     refreshVisitBadge();
@@ -1941,9 +1956,10 @@ async function openVisits() {
     list.innerHTML = rows.slice(0,50).map(r => {
       const d = new Date(r.visited_at);
       const timeStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      const locStr = r.location && r.location !== 'Unknown' ? ` · 📍 ${r.location}` : '';
       return `<div class="visit-row">
         <span class="visit-time">${timeStr}</span>
-        <span class="visit-info">${r.browser} · ${r.os} · ${r.screen_size||''}</span>
+        <span class="visit-info">${r.browser} · ${r.os}${locStr}</span>
       </div>`;
     }).join('');
   } catch(e) {
@@ -2672,6 +2688,7 @@ function mobActive(n) {
 //  NAME PROMPT
 // ═══════════════════════════════════════════════════════════════
 let currentUser = '';
+let currentLocation = ''; // fetched silently from ip-api on load
 function initName() {
   try {
     currentUser = localStorage.getItem('tracker_user_name') || '';
@@ -2733,6 +2750,8 @@ function confirmCancel() {
 // ═══════════════════════════════════════════════════════════════
 async function logActivity(propId, propAddress, pageType, stepLabel, action) {
   try {
+    // Use name if set, otherwise fall back to location, otherwise 'Unknown'
+    const actor = currentUser || (currentLocation ? '📍 ' + currentLocation : 'Unknown');
     await fetch(`${SB_URL}/rest/v1/activity_log`, {
       method: 'POST',
       headers: {...HEADERS, 'Prefer': 'return=minimal'},
@@ -2743,7 +2762,7 @@ async function logActivity(propId, propAddress, pageType, stepLabel, action) {
         page_type: pageType,
         step_label: stepLabel,
         action: action,
-        user_name: currentUser || 'Unknown',
+        user_name: actor,
         created_at: new Date().toISOString()
       })
     });
