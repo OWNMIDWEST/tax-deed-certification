@@ -681,6 +681,76 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 }
 .addr-row{display:flex;align-items:flex-start;gap:8px;width:100%}
 .addr-row .field-address{flex:1}
+
+/* CANCEL CASE BUTTON */
+.cancel-case-btn{
+  display:none;align-items:center;gap:4px;
+  background:transparent;border:1px solid rgba(201,59,42,0.3);
+  border-radius:8px;padding:5px 11px;
+  font-size:12px;font-weight:500;color:var(--dng);
+  cursor:pointer;transition:all .15s;font-family:var(--fb);
+}
+.cancel-case-btn:hover{background:var(--dng-dim);border-color:rgba(201,59,42,.5)}
+.reactivate-btn{
+  display:none;align-items:center;gap:4px;
+  background:transparent;border:1px solid rgba(14,158,101,0.35);
+  border-radius:8px;padding:5px 11px;
+  font-size:12px;font-weight:500;color:var(--teal);
+  cursor:pointer;transition:all .15s;font-family:var(--fb);
+}
+.reactivate-btn:hover{background:var(--teal-dim)}
+.prop-card.open .cancel-case-btn{display:inline-flex}
+.prop-card.open .reactivate-btn{display:inline-flex}
+/* Hide cancel when already cancelled, show reactivate instead */
+.prop-card.cancelled.open .cancel-case-btn{display:none}
+.prop-card.cancelled.open .reactivate-btn{display:inline-flex}
+.prop-card:not(.cancelled).open .reactivate-btn{display:none}
+
+/* CANCELLED BADGE */
+.cancelled-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:700;letter-spacing:.06em;
+  color:var(--dng);background:var(--dng-dim);
+  border:1px solid rgba(201,59,42,.3);border-radius:20px;
+  padding:2px 9px;font-family:var(--fm);white-space:nowrap
+}
+.cancelled-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--dng);flex-shrink:0}
+
+/* STOP / START CLOCK BUTTON */
+.stop-clock-btn{
+  display:none;align-items:center;gap:4px;
+  background:transparent;border:1px solid rgba(176,122,0,.35);
+  border-radius:8px;padding:5px 11px;
+  font-size:12px;font-weight:500;color:var(--warn);
+  cursor:pointer;transition:all .15s;font-family:var(--fb);
+}
+.stop-clock-btn:hover{background:var(--warn-dim);border-color:rgba(176,122,0,.6)}
+.start-clock-btn{
+  display:none;align-items:center;gap:4px;
+  background:transparent;border:1px solid rgba(14,158,101,.35);
+  border-radius:8px;padding:5px 11px;
+  font-size:12px;font-weight:500;color:var(--teal);
+  cursor:pointer;transition:all .15s;font-family:var(--fb);
+}
+.start-clock-btn:hover{background:var(--teal-dim);border-color:rgba(14,158,101,.6)}
+.prop-card.open .stop-clock-btn{display:inline-flex}
+.prop-card.open .start-clock-btn{display:inline-flex}
+/* When clock is stopped — hide stop, show start */
+.prop-card.clock-stopped.open .stop-clock-btn{display:none}
+.prop-card.clock-stopped.open .start-clock-btn{display:inline-flex}
+/* When clock is running — show stop, hide start */
+.prop-card:not(.clock-stopped).open .start-clock-btn{display:none}
+/* When cancelled — hide both clock buttons */
+.prop-card.cancelled.open .stop-clock-btn{display:none}
+.prop-card.cancelled.open .start-clock-btn{display:none}
+/* Clock stopped chip */
+.clock-stopped-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:700;letter-spacing:.05em;
+  color:var(--warn);background:var(--warn-dim);
+  border:1px solid rgba(176,122,0,.3);border-radius:20px;
+  padding:2px 8px;font-family:var(--fm)
+}
 </style>
 </head>
 <body>
@@ -1148,15 +1218,30 @@ function daysElapsed(d) { if(!d) return 0; const start = new Date(d+'T00:00:00')
 // If denied, freeze the clock at the denial date
 function daysElapsedDisplay(p) {
   if (!p.date_started) return '';
+  // Cancelled — freeze at cancellation date, grey strikethrough
+  if (p.cancelled && p.cancelled_at) {
+    const days = frozenDays(p.date_started, p.cancelled_at);
+    return `<span style="color:#888;font-weight:600;margin-left:6px;text-decoration:line-through">${days}d ⊘</span>`;
+  }
+  // Manually stopped clock — freeze, amber with ⏸
+  if (p.clock_stopped && p.clock_stopped_at) {
+    const days = frozenDays(p.date_started, p.clock_stopped_at);
+    return `<span style="color:var(--warn);font-weight:600;margin-left:6px">⏸ ${days}d</span>`;
+  }
+  // Denied — freeze at denial date, red strikethrough
   const isDenied = p.steps && p.steps.cert_denied;
   if (isDenied && p.denied_at) {
-    const start   = new Date(p.date_started + 'T00:00:00');
-    const stopped = new Date(p.denied_at);
-    stopped.setHours(0,0,0,0);
-    const days = Math.max(0, Math.round((stopped - start) / 86400000));
+    const days = frozenDays(p.date_started, p.denied_at);
     return `<span style="color:#c93b2a;font-weight:600;margin-left:6px;text-decoration:line-through">${days}d ✕</span>`;
   }
+  // Normal live counter
   return `<span style="color:#c97a00;font-weight:600;margin-left:6px">${daysElapsed(p.date_started)}d</span>`;
+}
+function frozenDays(startStr, stopStr) {
+  const start   = new Date(startStr + 'T00:00:00');
+  const stopped = new Date(stopStr);
+  stopped.setHours(0,0,0,0);
+  return Math.max(0, Math.round((stopped - start) / 86400000));
 }
 function progress(p) {
   if (!p.steps) return 0;
@@ -1314,13 +1399,17 @@ function sanitizeProp(p) {
     archived:     !!p.archived,
     last_edited_by: p.last_edited_by || '',
     denied_at:    p.denied_at || '',
+    cancelled:    !!p.cancelled,
+    cancelled_at: p.cancelled_at || '',
+    clock_stopped:    !!p.clock_stopped,
+    clock_stopped_at: p.clock_stopped_at || '',
   };
 }
 
 function buildCard(p) {
   const pr = progress(p);
   const card = document.createElement('div');
-  card.className = 'prop-card' + (allOpen ? ' open' : '');
+  card.className = 'prop-card' + (allOpen ? ' open' : '') + (p.cancelled ? ' cancelled' : '') + (p.clock_stopped && !p.cancelled ? ' clock-stopped' : '');
   card.dataset.id = p.id;
 
   // Steps HTML
@@ -1398,6 +1487,10 @@ function buildCard(p) {
         <div class="card-hd-actions">
           <button class="minimize-btn" onclick="event.stopPropagation();minimizeCard(this)">▲ Minimize</button>
           <button class="save-min-btn" onclick="event.stopPropagation();saveAndMinimize(this,'${p.id}','td')">✓ Save</button>
+          <button class="stop-clock-btn" onclick="event.stopPropagation();toggleClock('${p.id}','td','stop',this)">⏸ Stop Clock</button>
+          <button class="start-clock-btn" onclick="event.stopPropagation();toggleClock('${p.id}','td','start',this)">▶ Start Clock</button>
+          <button class="cancel-case-btn" onclick="event.stopPropagation();cancelCase('${p.id}','td',this)">⊘ Cancel Case</button>
+          <button class="reactivate-btn" onclick="event.stopPropagation();reactivateCase('${p.id}','td',this)">↺ Reactivate</button>
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEdit('${p.id}')">Edit</button>
         </div>
       </div>
@@ -1453,6 +1546,68 @@ function toggleCard(el) {
 function minimizeCard(el) {
   el.closest('.prop-card').classList.remove('open');
 }
+async function toggleClock(propId, type, action, el) {
+  const db = type === 'qt' ? qtDB : DB;
+  const p  = db.find(x => x.id === propId);
+  if (!p) return;
+  if (action === 'stop') {
+    p.clock_stopped    = true;
+    p.clock_stopped_at = new Date().toISOString();
+    toast('Clock stopped ⏸', 'ok');
+  } else {
+    p.clock_stopped    = false;
+    p.clock_stopped_at = '';
+    toast('Clock restarted ▶', 'ok');
+  }
+  p.updated_at = new Date().toISOString();
+  if (type === 'qt') { qtSchedSave(propId); }
+  else               { schedSave(propId);   }
+  const card = el.closest('.prop-card');
+  const wasOpen = card.classList.contains('open');
+  const fresh = type === 'qt' ? qtBuildCard(qtSanitizeProp(p)) : buildCard(sanitizeProp(p));
+  if (wasOpen) fresh.classList.add('open');
+  card.replaceWith(fresh);
+}
+
+async function cancelCase(propId, type, el) {
+  if (!confirm('Cancel this case? The clock will stop and the case will be marked cancelled. You can reactivate it at any time.')) return;
+  const db  = type === 'qt' ? qtDB : DB;
+  const p   = db.find(x => x.id === propId);
+  if (!p) return;
+  p.cancelled    = true;
+  p.cancelled_at = new Date().toISOString();
+  p.updated_at   = new Date().toISOString();
+  // Update card class and button visibility
+  const card = el.closest('.prop-card');
+  card.classList.add('cancelled');
+  // Refresh chip row
+  if (type === 'qt') { qtSchedSave(propId); }
+  else               { schedSave(propId);   }
+  // Re-render just the card
+  const wasOpen1 = card.classList.contains('open');
+  const freshC = type === 'qt' ? qtBuildCard(qtSanitizeProp(p)) : buildCard(sanitizeProp(p));
+  if (wasOpen1) freshC.classList.add('open');
+  card.replaceWith(freshC);
+  toast('Case cancelled — clock stopped', 'ok');
+}
+
+async function reactivateCase(propId, type, el) {
+  const db = type === 'qt' ? qtDB : DB;
+  const p  = db.find(x => x.id === propId);
+  if (!p) return;
+  p.cancelled    = false;
+  p.cancelled_at = '';
+  p.updated_at   = new Date().toISOString();
+  if (type === 'qt') { qtSchedSave(propId); }
+  else               { schedSave(propId);   }
+  const card = el.closest('.prop-card');
+  const wasOpen2 = card.classList.contains('open');
+  const freshR = type === 'qt' ? qtBuildCard(qtSanitizeProp(p)) : buildCard(sanitizeProp(p));
+  if (wasOpen2) freshR.classList.add('open');
+  card.replaceWith(freshR);
+  toast('Case reactivated — clock running', 'ok');
+}
+
 async function saveAndMinimize(el, propId, type) {
   const card = el.closest('.prop-card');
   if (type === 'qt') {
@@ -2170,6 +2325,10 @@ function qtSanitizeProp(p) {
     archived:     !!p.archived,
     last_edited_by: p.last_edited_by || '',
     qt_amounts:   (p.qt_amounts && typeof p.qt_amounts === 'object') ? p.qt_amounts : {},
+    cancelled:    !!p.cancelled,
+    cancelled_at: p.cancelled_at || '',
+    clock_stopped:    !!p.clock_stopped,
+    clock_stopped_at: p.clock_stopped_at || '',
   };
 }
 
@@ -2187,7 +2346,7 @@ function fmtMoney(n) {
 function qtBuildCard(p) {
   const pr = qtProgress(p);
   const card = document.createElement('div');
-  card.className = 'prop-card' + (qtAllOpen ? ' open' : '');
+  card.className = 'prop-card' + (qtAllOpen ? ' open' : '') + (p.cancelled ? ' cancelled' : '') + (p.clock_stopped && !p.cancelled ? ' clock-stopped' : '');
   card.dataset.id = p.id;
 
   let stepsHtml = '';
@@ -2230,9 +2389,10 @@ function qtBuildCard(p) {
     p.parcel  ? `<span class="chip">${esc(p.parcel)}</span>` : '',
     (p.county||p.state) ? `<span class="chip">${esc([p.county,p.state].filter(Boolean).join(', '))}</span>` : '',
     p.case_num ? `<span class="chip">Case: ${esc(p.case_num)}</span>` : '',
-    p.date_started ? `<span class="chip">Started: ${fmtDate(p.date_started)}<span style="color:#c97a00;font-weight:600;margin-left:6px">${daysElapsed(p.date_started)}d</span></span>` : '',
+    p.date_started ? `<span class="chip">Started: ${fmtDate(p.date_started)}${daysElapsedDisplay(p)}</span>` : '',
     `<span class="chip" style="color:var(--teal);border-color:rgba(50,209,144,.3);background:var(--teal-dim)">Total Paid: <strong>${fmtMoney(qtTotal)}</strong></span>`,
     p.foia_url ? `<span class="foia-badge"><span class="foia-badge-dot"></span>FOIA Uploaded</span>` : '',
+    p.cancelled ? `<span class="cancelled-badge"><span class="cancelled-badge-dot"></span>CASE CANCELLED</span>` : '',
   ].join('');
 
   card.innerHTML = `
@@ -2267,6 +2427,10 @@ function qtBuildCard(p) {
         <div class="card-hd-actions">
           <button class="minimize-btn" onclick="event.stopPropagation();minimizeCard(this)">▲ Minimize</button>
           <button class="save-min-btn" onclick="event.stopPropagation();saveAndMinimize(this,'${p.id}','qt')">✓ Save</button>
+          <button class="stop-clock-btn" onclick="event.stopPropagation();toggleClock('${p.id}','qt','stop',this)">⏸ Stop Clock</button>
+          <button class="start-clock-btn" onclick="event.stopPropagation();toggleClock('${p.id}','qt','start',this)">▶ Start Clock</button>
+          <button class="cancel-case-btn" onclick="event.stopPropagation();cancelCase('${p.id}','qt',this)">⊘ Cancel Case</button>
+          <button class="reactivate-btn" onclick="event.stopPropagation();reactivateCase('${p.id}','qt',this)">↺ Reactivate</button>
           <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();qtOpenEdit('${p.id}')">Edit</button>
         </div>
       </div>
