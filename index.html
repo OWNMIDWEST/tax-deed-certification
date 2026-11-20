@@ -751,6 +751,59 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
   border:1px solid rgba(176,122,0,.3);border-radius:20px;
   padding:2px 8px;font-family:var(--fm)
 }
+
+/* ── QT TIMELINE (page 5) ── */
+.v2-wrap{flex:1;overflow-y:auto;padding:18px 26px 90px;display:flex;flex-direction:column;gap:12px}
+.v2-legend{font-size:11px;color:var(--txt2);background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:10px 14px;line-height:1.55}
+.v2-legend b{color:var(--txt)}
+.v2-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden}
+.v2-card.v2-cancel{opacity:.55}
+.v2-head{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;padding:14px 18px;cursor:pointer}
+.v2-head:hover{background:var(--surf2)}
+.v2-addr{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+.v2-sub{font-size:11px;color:var(--txt2);font-family:var(--fm);margin-top:3px;display:flex;flex-wrap:wrap;gap:6px 12px}
+.v2-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.v2-chip{font-family:var(--fm);font-size:10.5px;padding:3px 8px;border-radius:20px;border:1px solid var(--bdr2);background:var(--surf2);white-space:nowrap}
+.v2-chip.ph{background:var(--pur-dim);color:var(--pur);border-color:transparent;font-weight:600}
+.v2-chip.ok{background:var(--teal-dim);color:var(--teal);border-color:transparent}
+.v2-chip.warn{background:var(--warn-dim);color:var(--warn);border-color:transparent}
+.v2-chip.dng{background:var(--dng-dim);color:var(--dng);border-color:transparent}
+.v2-chip.info{background:var(--info-dim);color:var(--info);border-color:transparent}
+.v2-next{font-size:12px;color:var(--txt);margin-top:6px}
+.v2-next b{color:var(--acc)}
+.v2-bar{display:flex;gap:3px;margin-top:8px;max-width:420px}
+.v2-bar span{flex:1;height:5px;border-radius:3px;background:var(--surf3)}
+.v2-bar span.done{background:var(--teal)}
+.v2-bar span.cur{background:var(--acc)}
+.v2-body{display:none;border-top:1px solid var(--bdr);padding:14px 18px 18px}
+.v2-card.open .v2-body{display:block}
+.v2-ctl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:12px;font-size:12px;color:var(--txt2)}
+.v2-ctl select,.v2-ctl input[type=number],.v2-ctl input[type=date]{font-family:var(--fm);font-size:11.5px;padding:4px 6px;border:1px solid var(--bdr2);border-radius:6px;background:var(--surf)}
+.v2-ctl input[type=number]{width:52px}
+.v2-flag{display:inline-flex;align-items:center;gap:4px;cursor:pointer;user-select:none}
+.v2-phase{margin-top:12px}
+.v2-ph-lbl{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);border-bottom:1px solid var(--bdr);padding-bottom:4px;margin-bottom:8px;display:flex;justify-content:space-between}
+.v2-ph-lbl em{font-style:normal;font-family:var(--fm);letter-spacing:0;text-transform:none;font-weight:400}
+.v2-steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:8px}
+.v2-step{border:1px solid var(--bdr2);border-radius:var(--r);padding:9px 10px;background:var(--surf);display:flex;flex-direction:column;gap:6px}
+.v2-step.done{background:var(--teal-dim);border-color:rgba(14,158,101,.35)}
+.v2-step.legacy{background:var(--info-dim);border-color:rgba(26,127,168,.3)}
+.v2-step.nextup{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.v2-step-top{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.v2-box{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--bdr2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+.v2-step.done .v2-box{background:var(--teal);border-color:var(--teal)}
+.v2-step.legacy .v2-box{background:var(--info);border-color:var(--info)}
+.v2-step-lbl{font-size:12.5px;font-weight:500;line-height:1.3}
+.v2-opt{font-size:9.5px;color:var(--txt3);font-family:var(--fm);margin-left:4px}
+.v2-step-meta{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--txt2);font-family:var(--fm);flex-wrap:wrap}
+.v2-step-meta input[type=date]{font-family:var(--fm);font-size:10.5px;padding:2px 4px;border:1px solid var(--bdr2);border-radius:5px;background:var(--surf)}
+.v2-clock{font-size:10.5px;font-family:var(--fm);color:var(--warn)}
+.v2-clock.ok{color:var(--teal)}
+.v2-bill{margin-top:16px;background:var(--surf2);border-radius:var(--r);padding:10px 12px}
+.v2-bill-row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:12px}
+.v2-bill-item{display:flex;align-items:center;gap:5px}
+.v2-bill-item input[type=number]{width:84px;font-family:var(--fm);font-size:11px;padding:3px 5px;border:1px solid var(--bdr2);border-radius:5px}
+@media(max-width:700px){.v2-wrap{padding:12px 10px 90px}.v2-head{flex-direction:column}.v2-right{align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -770,6 +823,9 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
     </button>
     <button class="page-btn" id="nav-p2" onclick="showPage(2)">
       <span class="page-icon">⚖️</span> Quiet Titles
+    </button>
+    <button class="page-btn" id="nav-p5" onclick="showPage(5)">
+      <span class="page-icon">⏱️</span> QT Timeline
     </button>
     <button class="page-btn" id="nav-p3" onclick="showPage(3)">
       <span class="page-icon">📜</span> Activity Log
@@ -906,6 +962,46 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
   </div>
 
 
+
+  <!-- PAGE 5: QT TIMELINE (additional view of the same quiet title cases) -->
+  <div id="page5" style="display:none;flex:1;flex-direction:column">
+    <div class="topbar">
+      <div class="topbar-l">
+        <div class="topbar-title">QT Timeline</div>
+        <div class="topbar-sub">Same cases as Quiet Titles, organized by court phase with legal clocks. Nothing on the original page is changed.</div>
+      </div>
+      <div class="topbar-r">
+        <button class="btn btn-ghost btn-sm" onclick="v2ToggleAll()" id="v2-exp-btn">Expand All</button>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="st"><div class="st-lbl">Active Cases</div><div class="st-val g" id="v2-st-active">0</div></div>
+      <div class="st"><div class="st-lbl">Action Due / Overdue</div><div class="st-val t" id="v2-st-due">0</div></div>
+      <div class="st"><div class="st-lbl">Avg Days Open</div><div class="st-val t" id="v2-st-days">0</div></div>
+      <div class="st"><div class="st-lbl">Final Orders</div><div class="st-val g" id="v2-st-final">0</div></div>
+    </div>
+    <div class="toolbar">
+      <div class="sw">
+        <span class="si">⌕</span>
+        <input type="text" id="v2-search" placeholder="Search address, company, case #…" oninput="v2Render()"/>
+      </div>
+      <select class="fsel" id="v2-fwait" onchange="v2Render()">
+        <option value="">Waiting on: All</option>
+        <option>Attorney</option><option>Court</option><option>Newspaper</option><option>County</option><option>Us</option>
+      </select>
+      <select class="fsel" id="v2-fphase" onchange="v2Render()"><option value="">All Phases</option></select>
+    </div>
+    <div class="v2-wrap" id="v2-wrap">
+      <div class="v2-legend">
+        <b>How this page works:</b> check a step and it is dated today (change the date if it happened earlier). Waiting periods are counted from those dates.
+        <span style="color:var(--info)">Blue</span> = carried over from a step already checked on the Quiet Titles page (add the date when you know it).
+        <span style="color:var(--teal)">Green</span> = done here. Outlined = next action.
+        Benchmark: 2022 Porterfield case took <b>171 days</b> filing → order.
+      </div>
+      <div id="v2-list"><div class="empty-st" style="display:block"><div class="ei">🔄</div><p>Loading…</p></div></div>
+    </div>
+  </div>
+
 <!-- PAGE 3: ACTIVITY LOG -->
 <div id="page3" style="display:none;flex:1;flex-direction:column">
   <div class="topbar">
@@ -1003,6 +1099,9 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 </nav>
 <!-- MOBILE MORE MENU -->
 <div id="mob-more-menu" style="display:none;position:fixed;bottom:64px;right:0;left:0;background:var(--surf);border-top:1px solid var(--bdr2);z-index:49;padding:8px 0;box-shadow:0 -4px 16px rgba(0,0,0,0.1)">
+  <button class="mob-btn" style="flex-direction:row;gap:10px;justify-content:flex-start;padding:12px 20px;width:100%" onclick="showPage(5);mobActive(5);closeMobMore()">
+    <span class="mob-btn-icon">⏱️</span><span class="mob-btn-label" style="font-size:13px">QT Timeline</span>
+  </button>
   <button class="mob-btn" style="flex-direction:row;gap:10px;justify-content:flex-start;padding:12px 20px;width:100%" onclick="showPage(3);mobActive(3);closeMobMore()">
     <span class="mob-btn-icon">📜</span><span class="mob-btn-label" style="font-size:13px">Activity Log</span>
   </button>
@@ -1803,7 +1902,7 @@ function exportJSON() {
 // ── PAGE NAV ─────────────────────────────────────────────
 function showPage(n) {
   currentPage = n;
-  [1,2,3,4].forEach(i => {
+  [1,2,3,4,5].forEach(i => {
     const p = document.getElementById('page'+i);
     if (p) { p.style.display = n===i ? 'flex' : 'none'; if(n===i) p.style.flexDirection='column'; }
     const nb = document.getElementById('nav-p'+i);
@@ -1814,6 +1913,7 @@ function showPage(n) {
   if (n===2) qtRender();
   if (n===3) loadActivity();
   if (n===4) loadArchive();
+  if (n===5) v2Load();
 }
 
 // ── TOAST ────────────────────────────────────────────────
@@ -3057,6 +3157,360 @@ function exportJSON() {
   a.download = `tracker-full-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   toast('Full backup downloaded', 'info');
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  PAGE 5 — QT TIMELINE
+//  Additional view of the SAME qt_properties rows. It never removes or
+//  rewrites the original Quiet Titles steps. Its own data is stored inside
+//  each row's existing `steps` JSON under the key "_v2":
+//    steps._v2 = { s: { stepId: {d:'YYYY-MM-DD', by, at} },
+//                  m: { waiting, served, total, hearing_date, flags:{} } }
+//  Old-page step ids are left untouched, so the Quiet Titles page keeps working.
+// ═══════════════════════════════════════════════════════════════
+const V2_PHASES = [
+  {id:'pre',      label:'Pre-Filing'},
+  {id:'filing',   label:'Filing'},
+  {id:'service',  label:'Service'},
+  {id:'response', label:'Response Period'},
+  {id:'default',  label:'Default & Reference'},
+  {id:'hearing',  label:'Hearing'},
+  {id:'judgment', label:'Judgment & Close'},
+];
+// legacy = Quiet Titles page step id that already covers this step
+const V2_STEPS = [
+  {id:'ret_signed',      ph:'pre',      label:'Retainer signed',                          legacy:'sign_ret'},
+  {id:'title_work',      ph:'pre',      label:'Title work / abstract',                    legacy:'title_prog'},
+  {id:'foia',            ph:'pre',      label:'Tax collector file / FOIA received',       legacyFn:p=>!!p.foia_url},
+  {id:'notice_review',   ph:'pre',      label:'Notice-chain review (levy, posting, ads, redemption & mortgagee notices)', legacy:'research'},
+  {id:'filed',           ph:'filing',   label:'Summons & Complaint + Lis Pendens filed',  legacy:'lis_pen'},
+  {id:'served',          ph:'service',  label:'Personal service complete',                counter:true},
+  {id:'non_service',     ph:'service',  label:'Affidavit(s) of non-service',              optional:true},
+  {id:'order_pub',       ph:'service',  label:'Order of Publication',                     legacy:'pub', optional:true},
+  {id:'gal',             ph:'service',  label:'GAL Nisi appointed',                       legacy:'guardian'},
+  {id:'pub_done',        ph:'service',  label:'Publication complete (affidavit filed) — enter LAST run date', optional:true},
+  {id:'answer_deadline', ph:'response', label:'Answer period expired'},
+  {id:'answers',         ph:'response', label:'Answers reviewed (GAL / county / heirs)'},
+  {id:'default',         ph:'default',  label:'Non-military affidavit + Order of Default'},
+  {id:'consent_ref',     ph:'default',  label:'Consent to reference (if anyone answered)', optional:true},
+  {id:'order_ref',       ph:'default',  label:'Order of Reference to Master',             legacy:'master'},
+  {id:'notice_hearing',  ph:'hearing',  label:'Notice of hearing served',                 legacy:'hearing'},
+  {id:'exhibits',        ph:'hearing',  label:'Exhibits + proposed order filed'},
+  {id:'hearing_held',    ph:'hearing',  label:'Hearing held'},
+  {id:'order_qt',        ph:'judgment', label:'Order quieting title',                     legacy:'final'},
+  {id:'order_served',    ph:'judgment', label:'Order served (starts appeal clock)'},
+  {id:'appeal_over',     ph:'judgment', label:'Appeal period over'},
+  {id:'recorded',        ph:'judgment', label:'Order recorded with Register of Deeds'},
+  {id:'insurable',       ph:'judgment', label:'Title insurable / ready to sell'},
+];
+const V2_FLAGS = [
+  {id:'contested', label:'Contested'},
+  {id:'heirs',     label:'Deceased owner / heirs'},
+  {id:'mortgagee', label:'Mortgagee of record'},
+  {id:'occupied',  label:'Occupied'},
+];
+const V2_WAIT = ['','Attorney','Court','Newspaper','County','Us'];
+const V2_BENCH = 171;
+let v2Open = {};
+let v2AllOpen = false;
+
+// ── data helpers ──
+function v2Data(p) {
+  if (!p.steps || typeof p.steps !== 'object') p.steps = {};
+  if (!p.steps._v2 || typeof p.steps._v2 !== 'object') p.steps._v2 = {};
+  const v = p.steps._v2;
+  if (!v.s || typeof v.s !== 'object') v.s = {};
+  if (!v.m || typeof v.m !== 'object') v.m = {};
+  if (!v.m.flags || typeof v.m.flags !== 'object') v.m.flags = {};
+  return v;
+}
+function v2Peek(p) { return (p.steps && p.steps._v2) || {s:{}, m:{flags:{}}}; }
+function v2Today() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function v2Add(ds, n) {
+  if (!ds) return '';
+  const d = new Date(ds+'T00:00:00'); d.setDate(d.getDate()+n);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function v2Max(a,b){ if(!a) return b||''; if(!b) return a; return a>b?a:b; }
+function v2DaysBetween(a,b){ return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000); }
+// state: 'done' (dated here), 'legacy' (checked on old page only), '' (open)
+function v2State(p, s) {
+  const v = v2Peek(p);
+  if (v.s && v.s[s.id]) return 'done';
+  if (s.legacy && p.steps && p.steps[s.legacy]) return 'legacy';
+  if (s.legacyFn && s.legacyFn(p)) return 'legacy';
+  return '';
+}
+function v2Date(p, id) { const v = v2Peek(p); return (v.s && v.s[id] && v.s[id].d) || ''; }
+
+// Waiting-period clocks. Returns {date, label} or null.
+function v2Clock(p, id) {
+  const d = x => v2Date(p, x);
+  switch (id) {
+    case 'filed':           return d('filed') ? {date:v2Add(d('filed'),210), label:'Clerk ADR deadline (filing + 210 days)', info:true} : null;
+    case 'pub_done':        return d('order_pub') ? {date:v2Add(d('order_pub'),21), label:'3 weekly runs ≈ 21 days after order'} : null;
+    case 'answer_deadline':
+    case 'default': {
+      const base = v2Max(d('served'), d('pub_done'));
+      return base ? {date:v2Add(base,30), label:'30 days after last service / last publication (answers + GAL nisi)'} : null;
+    }
+    case 'hearing_held':    return d('notice_hearing') ? {date:v2Add(d('notice_hearing'),10), label:'At least 10 days after notice of hearing'} : null;
+    case 'appeal_over':     return d('order_served') ? {date:v2Add(d('order_served'),30), label:'30 days after order served'} : null;
+  }
+  return null;
+}
+function v2NextStep(p) { return V2_STEPS.find(s => !s.optional && !v2State(p, s)) || null; }
+function v2PhaseIdx(p) {
+  const n = v2NextStep(p);
+  return n ? V2_PHASES.findIndex(ph => ph.id === n.ph) : V2_PHASES.length;
+}
+function v2DaysOpen(p) {
+  const start = v2Date(p,'filed') || p.date_started;
+  if (!start) return null;
+  const end = v2Date(p,'order_qt') || (p.cancelled && p.cancelled_at ? p.cancelled_at.slice(0,10) : '')
+           || (p.clock_stopped && p.clock_stopped_at ? p.clock_stopped_at.slice(0,10) : '') || v2Today();
+  return Math.max(0, v2DaysBetween(start, end));
+}
+function v2NextInfo(p) {
+  const n = v2NextStep(p);
+  if (!n) return {txt:'All required steps complete', cls:'ok', due:false};
+  const c = v2Clock(p, n.id);
+  if (c && !c.info) {
+    if (c.date > v2Today()) return {step:n, txt:`wait until ${fmtDate(c.date)}`, cls:'warn', due:false};
+    return {step:n, txt:`clock ended ${fmtDate(c.date)} — act now`, cls:'dng', due:true};
+  }
+  return {step:n, txt:'ready now', cls:'info', due:false};
+}
+
+// ── loading ──
+async function v2Load() {
+  try {
+    if (!qtInited) { await qtInit(); }
+    if (!qtDB.length) { qtDB = await qtGet(); }
+  } catch(e) { toast('Timeline: could not reach Supabase','err'); }
+  v2Render();
+}
+
+// ── render ──
+function v2Filtered() {
+  const q = (document.getElementById('v2-search')?.value||'').toLowerCase();
+  const w = document.getElementById('v2-fwait')?.value||'';
+  const ph = document.getElementById('v2-fphase')?.value||'';
+  return qtDB.filter(p => {
+    if (p.archived) return false;
+    if (w && (v2Peek(p).m||{}).waiting !== w) return false;
+    if (ph !== '' && String(v2PhaseIdx(p)) !== ph) return false;
+    if (q) {
+      const hay = [p.address,p.company,p.law_firm,p.case_num,p.county,p.state,p.parcel].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+function v2Stats() {
+  const act = qtDB.filter(p => !p.archived && !p.cancelled);
+  const set = (id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;};
+  set('v2-st-active', act.length);
+  set('v2-st-due', act.filter(p=>v2NextInfo(p).due).length);
+  const days = act.filter(p=>!v2Date(p,'order_qt')).map(v2DaysOpen).filter(x=>x!==null);
+  set('v2-st-days', days.length ? Math.round(days.reduce((a,b)=>a+b,0)/days.length) : 0);
+  set('v2-st-final', qtDB.filter(p=>!p.archived && v2State(p, V2_STEPS.find(s=>s.id==='order_qt'))).length);
+  const sel = document.getElementById('v2-fphase');
+  if (sel && sel.options.length <= 1) {
+    sel.innerHTML = '<option value="">All Phases</option>' +
+      V2_PHASES.map((ph,i)=>`<option value="${i}">${i+1}. ${ph.label}</option>`).join('') +
+      `<option value="${V2_PHASES.length}">Complete</option>`;
+  }
+}
+function v2Render() {
+  const list = document.getElementById('v2-list');
+  if (!list) return;
+  v2Stats();
+  const items = v2Filtered();
+  if (!items.length) {
+    list.innerHTML = `<div class="empty-st" style="display:block"><div class="ei">⚖️</div><p>${qtDB.length?'No cases match your filters.':'No quiet title cases yet. Add them on the Quiet Titles page.'}</p></div>`;
+    return;
+  }
+  // overdue / act-now first, then by phase
+  items.sort((a,b)=>{
+    const da=v2NextInfo(a).due?0:1, db=v2NextInfo(b).due?0:1;
+    if (da!==db) return da-db;
+    return v2PhaseIdx(a)-v2PhaseIdx(b);
+  });
+  list.innerHTML = '';
+  items.forEach(p => { try { list.appendChild(v2Card(p)); } catch(e){ console.error('v2Card', p.id, e); } });
+}
+function v2Card(p) {
+  const v = v2Peek(p), m = v.m || {}, flags = m.flags || {};
+  const phi = v2PhaseIdx(p);
+  const ni = v2NextInfo(p);
+  const days = v2DaysOpen(p);
+  const card = document.createElement('div');
+  card.className = 'v2-card' + (v2Open[p.id]||v2AllOpen ? ' open':'') + (p.cancelled ? ' v2-cancel':'');
+  card.dataset.id = p.id;
+
+  const flagChips = V2_FLAGS.filter(f=>flags[f.id]).map(f=>`<span class="v2-chip ${f.id==='contested'?'dng':'warn'}">${f.label}</span>`).join('');
+  const phaseChip = phi >= V2_PHASES.length
+      ? `<span class="v2-chip ok">Complete</span>`
+      : `<span class="v2-chip ph">Phase ${phi+1}/7 · ${V2_PHASES[phi].label}</span>`;
+  const dayChip = days===null ? '' :
+      `<span class="v2-chip ${days>V2_BENCH && !v2Date(p,'order_qt')?'warn':''}">Day ${days} · benchmark ${V2_BENCH}</span>`;
+  const bar = V2_PHASES.map((ph,i)=>`<span class="${i<phi?'done':i===phi?'cur':''}" title="${ph.label}"></span>`).join('');
+  const nextTxt = ni.step ? `Next: <b>${esc(ni.step.label)}</b> — <span class="v2-chip ${ni.cls}">${ni.txt}</span>` : `<span class="v2-chip ok">${ni.txt}</span>`;
+  const waitTxt = m.waiting ? ` <span class="v2-chip">Waiting on: ${esc(m.waiting)}</span>` : '';
+
+  let body = `<div class="v2-ctl" onclick="event.stopPropagation()">
+      <label>Waiting on <select onchange="v2Meta('${p.id}','waiting',this.value)">${V2_WAIT.map(w=>`<option${(m.waiting||'')===w?' selected':''} value="${w}">${w||'—'}</option>`).join('')}</select></label>
+      <label>Defendants served <input type="number" min="0" value="${m.served??''}" onchange="v2Meta('${p.id}','served',this.value)"/> of <input type="number" min="0" value="${m.total??''}" onchange="v2Meta('${p.id}','total',this.value)"/></label>
+      <label>Hearing date <input type="date" value="${m.hearing_date||''}" onchange="v2Meta('${p.id}','hearing_date',this.value)"/></label>
+      ${V2_FLAGS.map(f=>`<label class="v2-flag"><input type="checkbox"${flags[f.id]?' checked':''} onchange="v2Flag('${p.id}','${f.id}',this.checked)"/>${f.label}</label>`).join('')}
+    </div>`;
+
+  V2_PHASES.forEach((ph,i) => {
+    const steps = V2_STEPS.filter(s=>s.ph===ph.id);
+    const req = steps.filter(s=>!s.optional);
+    const doneCnt = req.filter(s=>v2State(p,s)).length;
+    body += `<div class="v2-phase"><div class="v2-ph-lbl"><span>${i+1}. ${ph.label}</span><em>${doneCnt}/${req.length}</em></div><div class="v2-steps">`;
+    steps.forEach(s => {
+      const st = v2State(p, s);
+      const d = v2Date(p, s.id);
+      const c = v2Clock(p, s.id);
+      const isNext = ni.step && ni.step.id === s.id;
+      let meta = '';
+      if (st === 'done' || st === 'legacy') {
+        meta += `<span>${st==='legacy'?'From Quiet Titles · date:':'Date:'}</span><input type="date" value="${d}" onclick="event.stopPropagation()" onchange="v2SetDate('${p.id}','${s.id}',this.value)"/>`;
+        const by = (v.s && v.s[s.id] && v.s[s.id].by) || '';
+        if (by) meta += `<span>· ${esc(by)}</span>`;
+      }
+      if (s.counter && (m.total||m.served)) meta += `<span>${m.served||0} of ${m.total||'?'} served</span>`;
+      let clock = '';
+      if (c) {
+        const past = c.date <= v2Today();
+        clock = `<div class="v2-clock${c.info||past?' ok':''}" title="${esc(c.label)}">⏱ ${c.info?'ADR deadline':past?'Allowed since':'Earliest'} ${fmtDate(c.date)}</div>`;
+      } else if (['answer_deadline','default'].includes(s.id) && !st) {
+        clock = `<div class="v2-clock">⏱ Date "Personal service" and/or "Publication complete" to start the 30-day clock</div>`;
+      } else if (s.id==='hearing_held' && !st && !d) {
+        clock = '';
+      }
+      body += `<div class="v2-step${st?' '+st:''}${isNext?' nextup':''}">
+          <div class="v2-step-top" onclick="v2Toggle('${p.id}','${s.id}')">
+            <div class="v2-box">${st?'✓':''}</div>
+            <div class="v2-step-lbl">${esc(s.label)}${s.optional?'<span class="v2-opt">if needed</span>':''}</div>
+          </div>
+          ${meta?`<div class="v2-step-meta">${meta}</div>`:''}
+          ${clock}
+        </div>`;
+    });
+    body += `</div></div>`;
+  });
+
+  // Billing (same amounts as the Quiet Titles page; not counted in progress)
+  const amt = p.qt_amounts || {};
+  const billIds = (typeof QT_AMOUNT_STEPS!=='undefined') ? QT_AMOUNT_STEPS : [];
+  const total = (typeof calcQtTotal==='function') ? calcQtTotal(p) : 0;
+  body += `<div class="v2-bill" onclick="event.stopPropagation()"><div class="v2-ph-lbl"><span>Billing (shared with Quiet Titles page · not counted in progress)</span><em>Total paid ${typeof fmtMoney==='function'?fmtMoney(total):total}</em></div>
+    <div class="v2-bill-row">${billIds.map(id=>{
+      const lbl = (QT_STEPS.find(s=>s.id===id)||{}).label || id;
+      const paid = !!(p.steps && p.steps[id]);
+      return `<span class="v2-bill-item"><input type="checkbox"${paid?' checked':''} onchange="v2Paid('${p.id}','${id}',this.checked)"/>${esc(lbl)} <input type="number" step="0.01" value="${amt[id]||''}" placeholder="0.00" onchange="v2Amt('${p.id}','${id}',this.value)"/></span>`;
+    }).join('')}</div></div>`;
+
+  card.innerHTML = `
+    <div class="v2-head" onclick="v2OpenToggle('${p.id}')">
+      <div style="min-width:0;flex:1">
+        <div class="v2-addr">${esc(p.address||'(no address)')}</div>
+        <div class="v2-sub">
+          ${p.company?`<span>${esc(p.company)}</span>`:''}
+          ${p.case_num?`<span>Case ${esc(p.case_num)}</span>`:''}
+          ${p.law_firm?`<span>${esc(p.law_firm)}</span>`:''}
+          ${p.county||p.state?`<span>${esc([p.county,p.state].filter(Boolean).join(', '))}</span>`:''}
+          ${p.cancelled?'<span style="color:var(--dng)">Cancelled</span>':''}
+        </div>
+        <div class="v2-next">${nextTxt}${waitTxt}</div>
+        <div class="v2-bar">${bar}</div>
+      </div>
+      <div class="v2-right">${phaseChip}${dayChip}${flagChips}</div>
+    </div>
+    <div class="v2-body">${body}</div>`;
+  return card;
+}
+function v2Refresh(id) {
+  const p = qtDB.find(x=>x.id===id);
+  const old = document.querySelector(`.v2-card[data-id="${id}"]`);
+  if (p && old) old.replaceWith(v2Card(p));
+  v2Stats();
+}
+function v2Touch(p) {
+  p.last_edited_by = currentUser || 'Unknown';
+  p.updated_at = new Date().toISOString();
+  qtSchedSave(p.id);
+}
+
+// ── interactions ──
+function v2OpenToggle(id) {
+  v2Open[id] = !v2Open[id];
+  const el = document.querySelector(`.v2-card[data-id="${id}"]`);
+  if (el) el.classList.toggle('open', v2Open[id]);
+}
+function v2ToggleAll() {
+  v2AllOpen = !v2AllOpen;
+  if (!v2AllOpen) v2Open = {};
+  document.getElementById('v2-exp-btn').textContent = v2AllOpen ? 'Collapse All' : 'Expand All';
+  v2Render();
+}
+function v2Toggle(pid, sid) {
+  const p = qtDB.find(x=>x.id===pid); if (!p) return;
+  const s = V2_STEPS.find(x=>x.id===sid); if (!s) return;
+  const v = v2Data(p);
+  const st = v2State(p, s);
+  if (st === 'done') {
+    showConfirm(`Uncheck "${s.label}" on the Timeline? (Quiet Titles page is not changed)`, () => {
+      delete v.s[sid];
+      v2Touch(p); v2Refresh(pid);
+      logActivity(pid, p.address, 'qt', 'Timeline: '+s.label, 'unchecked');
+    });
+    return;
+  }
+  // open or legacy → record here with today's date (legacy keeps its old-page check untouched)
+  v.s[sid] = {d: v2Today(), by: currentUser || '', at: new Date().toISOString()};
+  v2Touch(p); v2Refresh(pid);
+  logActivity(pid, p.address, 'qt', 'Timeline: '+s.label, 'checked');
+  toast(st==='legacy' ? 'Dated today — change the date if it happened earlier' : '✓ Step complete — date set to today','ok');
+}
+function v2SetDate(pid, sid, val) {
+  const p = qtDB.find(x=>x.id===pid); if (!p) return;
+  const v = v2Data(p);
+  if (!val) { if (v.s[sid]) v.s[sid].d = ''; }
+  else if (v.s[sid]) v.s[sid].d = val;
+  else v.s[sid] = {d: val, by: currentUser || '', at: new Date().toISOString()};
+  v2Touch(p); v2Refresh(pid);
+}
+function v2Meta(pid, key, val) {
+  const p = qtDB.find(x=>x.id===pid); if (!p) return;
+  const v = v2Data(p);
+  v.m[key] = (key==='served'||key==='total') ? (val===''?'':parseInt(val,10)||0) : val;
+  v2Touch(p); v2Refresh(pid);
+}
+function v2Flag(pid, fid, on) {
+  const p = qtDB.find(x=>x.id===pid); if (!p) return;
+  const v = v2Data(p);
+  v.m.flags[fid] = !!on;
+  v2Touch(p); v2Refresh(pid);
+}
+function v2Paid(pid, sid, on) {
+  const p = qtDB.find(x=>x.id===pid); if (!p) return;
+  if (!p.steps) p.steps = {};
+  p.steps[sid] = !!on;
+  v2Touch(p); v2Refresh(pid);
+  const lbl = (QT_STEPS.find(s=>s.id===sid)||{}).label || sid;
+  logActivity(pid, p.address, 'qt', lbl, on ? 'checked' : 'unchecked');
+}
+function v2Amt(pid, sid, val) {
+  const p = qtDB.find(x=>x.id===pid); if (!p) return;
+  if (!p.qt_amounts) p.qt_amounts = {};
+  p.qt_amounts[sid] = parseFloat(val) || 0;
+  v2Touch(p); v2Refresh(pid);
 }
 
 </script>
