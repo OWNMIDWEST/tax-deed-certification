@@ -972,6 +972,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
       </div>
       <div class="topbar-r">
         <button class="btn btn-ghost btn-sm" onclick="v2ToggleAll()" id="v2-exp-btn">Expand All</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportJSON()">⬇ Export JSON</button>
       </div>
     </div>
     <div class="stats-bar">
@@ -3144,7 +3145,12 @@ function closeMobMore() { document.getElementById('mob-more-menu').style.display
 // ═══════════════════════════════════════════════════════════════
 //  UPDATED JSON EXPORT (entire site)
 // ═══════════════════════════════════════════════════════════════
-function exportJSON() {
+async function exportJSON() {
+  // Make sure quiet title cases are loaded so the backup is never missing them
+  if (!qtDB.length) {
+    try { if (!qtInited) { await qtInit(); } if (!qtDB.length) { qtDB = await qtGet(); } }
+    catch(e) { toast('Could not load Quiet Titles — backup not downloaded', 'err'); return; }
+  }
   const payload = {
     exported_at: new Date().toISOString(),
     exported_by: currentUser || 'Unknown',
